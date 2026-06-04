@@ -345,31 +345,25 @@
 
         progressTxt.textContent=`写真を準備しています… (${already+done+1}枚目〜)`;
 
-        const payload={
+        const payloadStr = JSON.stringify({
           school:SCHOOL_CODE, pass:PASS, shootDate:latestShootYM,
           files: await Promise.all(chunk.map(async f=>({
             name:f.name, mimeType:f.type,
             hash: await hash6(f),
             data: await toBase64(f)
           })))
-        };
+        });
 
         progressTxt.textContent=`送信中… ${already+done}/${files.length}枚`;
 
-        // GASへはno-corsで送る（応答本文は読めないが、確実に届く）
-        await fetch(GAS_URL,{
-          method:'POST',
-          mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body:JSON.stringify(payload)
-        });
+        // FormDataで送る＝「単純リクエスト」となりCORSプリフライトが起きない。
+        // GASが最も確実に受け取れる方式。応答(JSON)も読める。
+        const fd = new FormData();
+        fd.append('payload', payloadStr);
 
-        // 応答が読めないので、保存されたかをステータス確認で検証する
-        progressTxt.textContent=`確認中… ${already+done}/${files.length}枚`;
-        const ok = await verifySaved(chunk);
-        if(!ok){
-          throw new Error('保存の確認がとれませんでした。もう一度お試しください');
-        }
+        const res = await fetch(GAS_URL, { method:'POST', body: fd });
+        const d = await res.json();
+        if(!d || !d.ok) throw new Error((d&&d.error)||'保存に失敗しました');
 
         for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
         done+=chunk.length;

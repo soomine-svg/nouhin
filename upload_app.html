@@ -356,25 +356,42 @@
 
         progressTxt.textContent=`送信中… ${already+done}/${files.length}枚`;
 
-        // ★ ここが今回の核心 ★
-        // GASのexec応答は302で googleusercontent.com へ飛ぶ。これを
-        // ブラウザで「読もう」とすると詰まる（＝今までの不具合の正体）。
-        // だから【応答は読まない】。POSTは投げっぱなしにして、
-        // 保存できたかは「確実に通るGETのstatus照会」で確認する。
-        //
-        // ・mode:'no-cors' + Content-Type:text/plain は「単純リクエスト」なので
-        //   プリフライトが出ない。応答は opaque（読めない）が、読まないので問題ない。
-        // ・await しない：応答が返らなくてもリクエスト自体はGASに届き保存される。
-        fetch(GAS_URL, {
-          method:'POST',
-          mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body: payloadStr
-        }).catch(()=>{ /* 応答は使わないので握りつぶす */ });
+        // ★ 確認は二段構え ★
+        // 【主】送信した応答を直接読んで「ok:true」を受け取る。サーバーは数秒で
+        //   応答を返すので、これが読めれば待たずに確定できる。
+        //   text/plain の単純リクエスト＋redirect:'follow' で、GASが返す302の
+        //   先（googleusercontent）まで追って本文を読む。
+        // 【保険】応答が読めない/遅い通信環境のときは、リクエスト自体は届いて
+        //   保存されているので、Drive側を照会して保存を確認する（verifySaved）。
+        // 経過秒を表示して「固まって見える」のを防ぐ
+        const t0 = Date.now();
+        const ticker = setInterval(()=>{
+          const sec = Math.floor((Date.now()-t0)/1000);
+          progressTxt.textContent = `送信中… ${already+done}/${files.length}枚（${sec}秒）`;
+        }, 1000);
 
-        // ★ Drive側に本当に保存されたかを status 照会でポーリング確認
-        const ok = await verifySaved(chunk);
-        if(!ok) throw new Error('保存の確認がとれませんでした');
+        let confirmed = false;
+        try{
+          const ctrl = new AbortController();
+          const timer = setTimeout(()=>ctrl.abort(), 60000); // 60秒で打ち切り
+          const res = await fetch(GAS_URL, {
+            method:'POST',
+            headers:{'Content-Type':'text/plain;charset=utf-8'},
+            body: payloadStr,
+            redirect:'follow',
+            signal: ctrl.signal
+          });
+          clearTimeout(timer);
+          const d = JSON.parse(await res.text());
+          if(d && d.ok) confirmed = true;
+        }catch(e){ /* 読めなければ下の保険へ（保存自体は届いている） */ }
+        clearInterval(ticker);
+
+        if(!confirmed){
+          progressTxt.textContent=`保存を確認しています… ${already+done}/${files.length}枚`;
+          confirmed = await verifySaved(chunk);
+        }
+        if(!confirmed) throw new Error('保存の確認がとれませんでした');
 
         for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
         done+=chunk.length;

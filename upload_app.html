@@ -342,6 +342,9 @@
     try{
       for(let i=0;i<pending.length;i+=BATCH){
         const chunk=pending.slice(i,i+BATCH);
+
+        progressTxt.textContent=`写真を準備しています… (${already+done+1}枚目〜)`;
+
         const payload={
           school:SCHOOL_CODE, pass:PASS, shootDate:latestShootYM,
           files: await Promise.all(chunk.map(async f=>({
@@ -350,15 +353,36 @@
             data: await toBase64(f)
           })))
         };
-        const res=await fetch(GAS_URL,{
-          method:'POST',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body:JSON.stringify(payload)
-        });
-        const d=await res.json();
-        if(!d.ok) throw new Error(d.error||'保存に失敗しました');
 
-        // 送信成功した分を記録（中断後の再開に使う）
+        progressTxt.textContent=`送信中… ${already+done}/${files.length}枚（応答待ち）`;
+
+        // 60秒で打ち切るタイムアウト付き通信（固まり防止）
+        const controller=new AbortController();
+        const timer=setTimeout(()=>controller.abort(), 60000);
+
+        let d;
+        try{
+          const res=await fetch(GAS_URL,{
+            method:'POST',
+            // text/plain にすることでGASがプリフライト無しで受け取れる
+            headers:{'Content-Type':'text/plain;charset=utf-8'},
+            body:JSON.stringify(payload),
+            redirect:'follow',
+            signal:controller.signal
+          });
+          clearTimeout(timer);
+          const textBody=await res.text();      // まずテキストで受ける
+          d=JSON.parse(textBody);                // その後JSONとして解釈
+        }catch(netErr){
+          clearTimeout(timer);
+          if(netErr.name==='AbortError'){
+            throw new Error('応答が返ってきませんでした（通信が重い可能性）');
+          }
+          throw netErr;
+        }
+
+        if(!d || !d.ok) throw new Error((d&&d.error)||'保存に失敗しました');
+
         for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
         done+=chunk.length;
 
@@ -371,8 +395,8 @@
     }catch(err){
       const totalDone = already + done;
       progressTxt.textContent=
-        `通信が途切れました。${totalDone}/${files.length}枚 まで届いています。`+
-        `もう一度「送る」を押すと、続きから送れます。`;
+        `${totalDone}/${files.length}枚 まで届いています。`+
+        `もう一度「続きを送る」を押すと、残りから送れます。（${err.message}）`;
       send.disabled=false;
       send.textContent='続きを送る';
     }

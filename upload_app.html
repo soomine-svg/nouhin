@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H.P.canvas｜写真データ受付</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@500;600&display=swap');
+
+  :root{
+    --bg:#f7f4ee; --ink:#3a352e; --sub:#8a8276;
+    --accent:#c08a4e; --accent-deep:#9a6a36;
+    --card:#fffdf9; --line:#e6ddcf; --ok:#6b8f6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Zen Maru Gothic',sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(192,138,78,.08), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(107,143,107,.07), transparent 40%),
+      var(--bg);
+    color:var(--ink); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:28px 18px 60px; line-height:1.7;
+  }
+  .brand{text-align:center; margin-top:14px; margin-bottom:6px;}
+  .brand .logo{
+    font-family:'Shippori Mincho',serif; font-size:1.9rem;
+    letter-spacing:.08em; color:var(--accent-deep);
+  }
+  .brand .logo span{color:var(--accent-deep);}
+  .tagline{
+    font-family:'Shippori Mincho',serif; font-size:.92rem;
+    color:var(--sub); margin-top:8px; letter-spacing:.04em;
+  }
+  .school{margin:22px 0 4px; font-size:1.15rem; font-weight:700; text-align:center;}
+  .school small{
+    display:block; font-size:.78rem; color:var(--sub);
+    font-weight:400; letter-spacing:.05em; margin-bottom:2px;
+  }
+  .card{
+    width:100%; max-width:560px; background:var(--card);
+    border:1px solid var(--line); border-radius:22px;
+    padding:26px 24px; margin-top:18px;
+    box-shadow:0 18px 40px -28px rgba(120,90,40,.5);
+  }
+  .status{
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(180deg,#fbf6ec,#fdfbf6);
+    border:1px solid var(--line); border-radius:16px;
+    padding:16px 18px; margin-bottom:22px;
+  }
+  .status .dot{
+    width:38px;height:38px;flex:0 0 38px; border-radius:50%;
+    background:rgba(107,143,107,.14);
+    display:flex;align-items:center;justify-content:center; font-size:1.1rem;
+  }
+  .status .txt b{font-size:1.02rem;color:var(--ink);}
+  .status .txt p{font-size:.8rem;color:var(--sub);}
+  .drop{
+    border:2px dashed #d8cbb3; border-radius:18px; padding:40px 20px;
+    text-align:center; cursor:pointer; transition:.25s; background:#fffefb;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  }
+  .drop:hover,.drop.drag{border-color:var(--accent); background:#fdf6ea; transform:translateY(-1px);}
+  .drop .ico{font-size:2.6rem;}
+  .drop .big{font-size:1.12rem;font-weight:700;}
+  .drop .small{font-size:.82rem;color:var(--sub);}
+  #fileInput{display:none;}
+  .selected{margin-top:18px;display:none;}
+  .selected.show{display:block;}
+  .selected h4{font-size:.85rem;color:var(--sub);font-weight:500;margin-bottom:10px;}
+  .thumb-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .thumb{
+    width:62px;height:62px;border-radius:10px;overflow:hidden;
+    border:1px solid var(--line);position:relative;background:#eee;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.62rem;color:var(--sub);text-align:center;padding:2px;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;}
+  .count{font-size:.85rem;color:var(--ink);margin-top:12px;font-weight:700;}
+  .send{
+    width:100%; margin-top:22px; padding:18px; border:none; border-radius:16px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+    color:#fff; font-family:'Zen Maru Gothic',sans-serif; font-size:1.12rem;
+    font-weight:700; letter-spacing:.08em; cursor:pointer;
+    box-shadow:0 12px 24px -12px rgba(154,106,54,.8); transition:.2s;
+  }
+  .send:hover{filter:brightness(1.04);transform:translateY(-1px);}
+  .send:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .progress{margin-top:16px;display:none;}
+  .progress.show{display:block;}
+  .bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;}
+  .bar i{display:block;height:100%;width:0;background:var(--accent);transition:.3s;}
+  .progress p{font-size:.8rem;color:var(--sub);margin-top:6px;text-align:center;}
+  .help{margin-top:18px;font-size:.78rem;color:var(--sub);text-align:center;line-height:1.9;}
+  .footer{margin-top:34px;font-size:.72rem;color:#b3a991;letter-spacing:.06em;text-align:center;}
+
+  /* 合言葉入力ゲート */
+  .gate{
+    width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);
+    border-radius:22px;padding:30px 26px;margin-top:24px;text-align:center;
+    box-shadow:0 18px 40px -28px rgba(120,90,40,.5);
+  }
+  .gate h3{font-family:'Shippori Mincho',serif;font-size:1.1rem;margin-bottom:6px;}
+  .gate p{font-size:.82rem;color:var(--sub);margin-bottom:18px;}
+  .gate input{
+    width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;
+    font-size:1.1rem;text-align:center;letter-spacing:.3em;font-family:inherit;
+  }
+  .gate button{
+    width:100%;margin-top:14px;padding:14px;border:none;border-radius:12px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+    color:#fff;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+  }
+  .gate .err{color:#b5564b;font-size:.8rem;margin-top:10px;min-height:1.2em;}
+
+  .done{
+    position:fixed;inset:0;background:rgba(247,244,238,.96);
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:30px;z-index:50;
+  }
+  .done.show{display:flex;animation:fade .4s ease;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .done .mark{font-size:3.4rem;margin-bottom:16px;}
+  .done h2{font-family:'Shippori Mincho',serif;font-size:1.4rem;margin-bottom:10px;}
+  .done p{color:var(--sub);font-size:.92rem;}
+  .done button{
+    margin-top:26px;padding:12px 30px;border-radius:12px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);font-family:inherit;font-size:.9rem;cursor:pointer;
+  }
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+  <div class="brand">
+    <div class="logo">H.P.<span>canvas</span></div>
+    <div class="tagline">今しか見られない瞬間を、未来へつなぐ宝物に</div>
+  </div>
+
+  <!-- 合言葉ゲート -->
+  <div class="gate" id="gate">
+    <h3>写真データ受付ページ</h3>
+    <p id="gateSchool">合言葉を入力してください</p>
+    <input type="text" id="passInput" inputmode="numeric" placeholder="あいことば" autocomplete="off">
+    <button id="gateBtn">ひらく</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+
+  <!-- メイン（認証後に表示） -->
+  <div class="school hidden" id="mainHead">
+    <small>写真データ受付ページ</small>
+    <span id="schoolName">○○保育園</span> さま 専用
+  </div>
+
+  <div class="card hidden" id="mainCard">
+    <div class="status">
+      <div class="dot">🕊️</div>
+      <div class="txt">
+        <b id="statusDate">―</b> <span id="statusSuffix"></span>
+        <p>最新の撮影日をもとに自動表示しています</p>
+      </div>
+    </div>
+
+    <label class="drop" id="drop" for="fileInput">
+      <div class="ico">📷</div>
+      <div class="big">ここに写真を入れてください</div>
+      <div class="small">タップして選ぶ／ドラッグでもOK（JPG・HEIC対応）</div>
+    </label>
+    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
+
+    <div class="selected" id="selected">
+      <h4>選ばれた写真</h4>
+      <div class="thumb-row" id="thumbs"></div>
+      <div class="count" id="count"></div>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="bar"><i id="barFill"></i></div>
+      <p id="progressTxt">送っています…</p>
+    </div>
+
+    <button class="send" id="send" disabled>この写真を送る</button>
+
+    <div class="help">
+      迷ったときは、入れたい写真をぜんぶ選んで「送る」を押すだけで大丈夫です。<br>
+      送信後はこのページを閉じていただいてかまいません。
+    </div>
+  </div>
+
+  <div class="footer">H.P.canvas株式会社　記憶の片隅に、そっと灯る写真を。</div>
+
+  <div class="done" id="done">
+    <div class="mark">✨</div>
+    <h2>ありがとうございました</h2>
+    <p id="doneMsg">写真をたしかに受け取りました。<br>大切にお預かりいたします。</p>
+    <button onclick="location.reload()">とじる</button>
+  </div>
+
+<!-- EXIF撮影日を読むためのライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js"></script>
+<script>
+  // ============================================================
+  //  設定：GASのウェブアプリURLをここに貼り付け
+  // ============================================================
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrBqR037fGAdDMa4p-FJCixHDOKjMZvFRuZlvQMb7DLXusc5WtOulVAGOpJB34mfngUA/exec';
+
+  // 園コードはURLのパラメータから取得（例: ?school=sakura）
+  const params = new URLSearchParams(location.search);
+  const SCHOOL_CODE = params.get('school') || '';
+
+  let PASS = '';
+  let files = [];
+  let latestShootYM = null;   // 最新撮影年月 "2026-05"
+  let uploadedSet = {};       // 送信済み内容ハッシュ（先頭6桁）{ hash6: true }
+  let fileHashes = new Map(); // File -> hash6 のキャッシュ
+
+  const $ = id => document.getElementById(id);
+
+  // ---------- 合言葉ゲート ----------
+  $('gateBtn').addEventListener('click', openGate);
+  $('passInput').addEventListener('keydown', e => { if(e.key==='Enter') openGate(); });
+
+  async function openGate(){
+    const pass = $('passInput').value.trim();
+    if(!pass){ $('gateErr').textContent='合言葉を入れてください'; return; }
+    $('gateErr').textContent='確認しています…';
+    try{
+      const res = await fetch(`${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}&pass=${encodeURIComponent(pass)}`);
+      const d = await res.json();
+      if(!d.ok){ $('gateErr').textContent = d.error || '合言葉が違うようです'; return; }
+      PASS = pass;
+      uploadedSet = {};
+      (d.uploadedHashes || []).forEach(h => uploadedSet[h] = true);
+      $('schoolName').textContent = d.schoolName;
+      if(d.lastDate){
+        $('statusDate').textContent = d.lastDate + '分';
+        $('statusSuffix').textContent = 'まで受け取り済みです';
+      }else{
+        $('statusDate').textContent = 'まだ受け取りはありません';
+        $('statusSuffix').textContent = '';
+      }
+      $('gate').classList.add('hidden');
+      $('mainHead').classList.remove('hidden');
+      $('mainCard').classList.remove('hidden');
+    }catch(err){
+      $('gateErr').textContent = '通信に失敗しました。電波のよい場所でお試しください。';
+    }
+  }
+
+  // ---------- ファイル選択 ----------
+  const fileInput=$('fileInput'), drop=$('drop'), selected=$('selected'),
+        thumbs=$('thumbs'), count=$('count'), send=$('send');
+
+  fileInput.addEventListener('change',e=>handle(e.target.files));
+  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
+  drop.addEventListener('drop',e=>handle(e.dataTransfer.files));
+
+  async function handle(list){
+    files=Array.from(list);
+    if(!files.length)return;
+    thumbs.innerHTML='';
+    let latest=null;
+
+    for(const f of files.slice(0,12)){
+      const t=document.createElement('div');t.className='thumb';
+      if(f.type.startsWith('image/')&&!/heic|heif/i.test(f.name)){
+        const img=document.createElement('img');img.src=URL.createObjectURL(f);t.appendChild(img);
+      }else{
+        t.textContent=(f.name.split('.').pop()||'IMG').toUpperCase();
+      }
+      thumbs.appendChild(t);
+    }
+    if(files.length>12){
+      const more=document.createElement('div');more.className='thumb';
+      more.textContent='+'+(files.length-12);thumbs.appendChild(more);
+    }
+
+    // EXIF撮影日を読む（JPG中心。読めたものの最新を採用）
+    for(const f of files){
+      let dt=null;
+      try{
+        const ex=await exifr.parse(f,['DateTimeOriginal']);
+        if(ex&&ex.DateTimeOriginal) dt=new Date(ex.DateTimeOriginal);
+      }catch(e){/* HEIC等は読めないことがある */}
+      if(!dt) dt=new Date(f.lastModified); // フォールバック
+      if(!latest||dt>latest) latest=dt;
+    }
+    if(latest){
+      const y=latest.getFullYear(), m=String(latest.getMonth()+1).padStart(2,'0');
+      latestShootYM=`${y}-${m}`;
+    }
+
+    // 送信済み判定（内容ハッシュで照合）
+    let doneCount = 0;
+    for(const f of files){
+      const h = await hash6(f);
+      if(uploadedSet[h]) doneCount++;
+    }
+    const pendingCount = files.length - doneCount;
+    if(doneCount > 0){
+      count.textContent = `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`;
+    }else{
+      count.textContent = files.length+' 枚を選びました';
+    }
+    selected.classList.add('show');
+    send.disabled=false;
+  }
+
+  // ---------- 送信 ----------
+  send.addEventListener('click', upload);
+
+  async function upload(){
+    if(!files.length) return;
+
+    // 内容ハッシュで「未送信ファイル」だけを対象にする
+    const pending = [];
+    for(const f of files){
+      const h = await hash6(f);
+      if(!uploadedSet[h]) pending.push(f);
+    }
+    const already = files.length - pending.length;
+
+    if(pending.length === 0){
+      $('done').classList.add('show');
+      return;
+    }
+
+    send.disabled=true;
+    $('progress').classList.add('show');
+    const barFill=$('barFill'), progressTxt=$('progressTxt');
+
+    const BATCH=5;
+    let done=0;
+
+    if(already>0){
+      progressTxt.textContent=`すでに ${already}枚 受け取り済み。残り ${pending.length}枚 を送ります…`;
+    }
+
+    try{
+      for(let i=0;i<pending.length;i+=BATCH){
+        const chunk=pending.slice(i,i+BATCH);
+        const payload={
+          school:SCHOOL_CODE, pass:PASS, shootDate:latestShootYM,
+          files: await Promise.all(chunk.map(async f=>({
+            name:f.name, mimeType:f.type,
+            hash: await hash6(f),
+            data: await toBase64(f)
+          })))
+        };
+        const res=await fetch(GAS_URL,{
+          method:'POST',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify(payload)
+        });
+        const d=await res.json();
+        if(!d.ok) throw new Error(d.error||'保存に失敗しました');
+
+        // 送信成功した分を記録（中断後の再開に使う）
+        for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
+        done+=chunk.length;
+
+        const totalDone = already + done;
+        const pct=Math.round(totalDone/files.length*100);
+        barFill.style.width=pct+'%';
+        progressTxt.textContent=`送っています… ${totalDone}/${files.length}枚`;
+      }
+      $('done').classList.add('show');
+    }catch(err){
+      const totalDone = already + done;
+      progressTxt.textContent=
+        `通信が途切れました。${totalDone}/${files.length}枚 まで届いています。`+
+        `もう一度「送る」を押すと、続きから送れます。`;
+      send.disabled=false;
+      send.textContent='続きを送る';
+    }
+  }
+
+  function toBase64(file){
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve(r.result.split(',')[1]);
+      r.onerror=reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  // ファイル内容からSHA-256の先頭6桁を計算（送信済み判定に使う）
+  async function hash6(file){
+    if(fileHashes.has(file)) return fileHashes.get(file);
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    const hex = Array.from(new Uint8Array(digest))
+      .map(b=>b.toString(16).padStart(2,'0')).join('');
+    const h = hex.substring(0,6);
+    fileHashes.set(file, h);
+    return h;
+  }
+
+  // 園名を仮表示（ゲート前）
+  if(SCHOOL_CODE) $('gateSchool').textContent='合言葉を入力してください';
+</script>
+</body>
+</html>

@@ -332,7 +332,7 @@
     $('progress').classList.add('show');
     const barFill=$('barFill'), progressTxt=$('progressTxt');
 
-    const BATCH=5;
+    const BATCH=2;
     let done=0;
 
     if(already>0){
@@ -356,14 +356,25 @@
 
         progressTxt.textContent=`送信中… ${already+done}/${files.length}枚`;
 
-        // FormDataで送る＝「単純リクエスト」となりCORSプリフライトが起きない。
-        // GASが最も確実に受け取れる方式。応答(JSON)も読める。
-        const fd = new FormData();
-        fd.append('payload', payloadStr);
+        // ★ ここが今回の核心 ★
+        // GASのexec応答は302で googleusercontent.com へ飛ぶ。これを
+        // ブラウザで「読もう」とすると詰まる（＝今までの不具合の正体）。
+        // だから【応答は読まない】。POSTは投げっぱなしにして、
+        // 保存できたかは「確実に通るGETのstatus照会」で確認する。
+        //
+        // ・mode:'no-cors' + Content-Type:text/plain は「単純リクエスト」なので
+        //   プリフライトが出ない。応答は opaque（読めない）が、読まないので問題ない。
+        // ・await しない：応答が返らなくてもリクエスト自体はGASに届き保存される。
+        fetch(GAS_URL, {
+          method:'POST',
+          mode:'no-cors',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: payloadStr
+        }).catch(()=>{ /* 応答は使わないので握りつぶす */ });
 
-        const res = await fetch(GAS_URL, { method:'POST', body: fd });
-        const d = await res.json();
-        if(!d || !d.ok) throw new Error((d&&d.error)||'保存に失敗しました');
+        // ★ Drive側に本当に保存されたかを status 照会でポーリング確認
+        const ok = await verifySaved(chunk);
+        if(!ok) throw new Error('保存の確認がとれませんでした');
 
         for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
         done+=chunk.length;
@@ -378,36 +389,39 @@
       const totalDone = already + done;
       progressTxt.textContent=
         `${totalDone}/${files.length}枚 まで届いています。`+
-        `もう一度「続きを送る」を押すと、残りから送れます。（${err.message}）`;
+        `もう一度「続きを送る」を押すと、残りから送れます。`;
       send.disabled=false;
       send.textContent='続きを送る';
     }
   }
 
   /**
-   * 送ったチャンクが本当にDriveに保存されたかを、ステータス確認で検証する。
-   * GASにstatus問い合わせ→保存済みハッシュ一覧を取得→チャンク全件含まれるか確認。
-   * no-cors送信は応答が読めないため、この方法で到達を確かめる。
+   * 送ったチャンクが本当にDriveに保存されたかを、status照会で検証する。
+   * POSTの応答は読まない設計なので、保存の成否はこの「確実に通るGET」で確かめる。
+   * 成功すれば即座に抜ける。最大90秒まで待つ（doPostが遅い場合の保険）。
    */
   async function verifySaved(chunk){
-    const wantHashes = [];
-    for(const f of chunk){ wantHashes.push(await hash6(f)); }
+    const want = [];
+    for(const f of chunk){ want.push(await hash6(f)); }
 
-    // GAS処理完了を待つため、少し間隔をあけて最大数回リトライ
-    for(let attempt=0; attempt<6; attempt++){
-      await sleep(2000); // 2秒待つ
+    const DEADLINE = Date.now() + 90000; // 最大90秒（成功すれば即抜け）
+    await sleep(1500); // doPostが動き出す猶予を少しだけ与える
+
+    while(Date.now() < DEADLINE){
       try{
+        // t= はキャッシュ避け。古いハッシュ一覧を掴まないようにする。
         const res = await fetch(
-          `${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}&pass=${encodeURIComponent(PASS)}`
+          `${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}`+
+          `&pass=${encodeURIComponent(PASS)}&t=${Date.now()}`
         );
         const d = await res.json();
         if(d && d.ok){
           const have = {};
           (d.uploadedHashes||[]).forEach(h=>have[h]=true);
-          // チャンク全部が保存済みに含まれていれば成功
-          if(wantHashes.every(h=>have[h])) return true;
+          if(want.every(h=>have[h])) return true; // チャンク全部が保存済み＝成功
         }
-      }catch(e){ /* リトライ継続 */ }
+      }catch(e){ /* 一時的な失敗はリトライで吸収 */ }
+      await sleep(2500);
     }
     return false;
   }

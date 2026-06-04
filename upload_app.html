@@ -202,7 +202,7 @@
 <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js"></script>
 <script>
   // ============================================================
-  //  設定：GASのウェブアプリURLをここに貼り付け
+  //  設定：GASのウェブアプリURL
   // ============================================================
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrBqR037fGAdDMa4p-FJCixHDOKjMZvFRuZlvQMb7DLXusc5WtOulVAGOpJB34mfngUA/exec';
 
@@ -211,10 +211,10 @@
   const SCHOOL_CODE = params.get('school') || '';
 
   let PASS = '';
-  let files = [];
-  let latestShootYM = null;   // 最新撮影年月 "2026-05"
-  let uploadedSet = {};       // 送信済み内容ハッシュ（先頭6桁）{ hash6: true }
-  let fileHashes = new Map(); // File -> hash6 のキャッシュ
+  let files = [];               // 今回選ばれたファイル（再送時もそのまま使い回す）
+  let latestShootYM = null;     // 最新撮影年月 "2026-05"
+  let uploadedSet = {};         // 受取済みの内容ハッシュ(先頭6桁) { hash6: true }
+  let fileHashes = new Map();   // File -> hash6 のキャッシュ
 
   const $ = id => document.getElementById(id);
 
@@ -227,12 +227,12 @@
     if(!pass){ $('gateErr').textContent='合言葉を入れてください'; return; }
     $('gateErr').textContent='確認しています…';
     try{
-      const res = await fetch(`${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}&pass=${encodeURIComponent(pass)}`);
+      const res = await fetch(`${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
       const d = await res.json();
       if(!d.ok){ $('gateErr').textContent = d.error || '合言葉が違うようです'; return; }
       PASS = pass;
       uploadedSet = {};
-      (d.uploadedHashes || []).forEach(h => uploadedSet[h] = true);
+      (d.uploadedHashes || []).forEach(h => uploadedSet[String(h).toLowerCase()] = true);
       $('schoolName').textContent = d.schoolName;
       if(d.lastDate){
         $('statusDate').textContent = d.lastDate + '分';
@@ -261,8 +261,8 @@
   async function handle(list){
     files=Array.from(list);
     if(!files.length)return;
+    send.textContent='この写真を送る';
     thumbs.innerHTML='';
-    let latest=null;
 
     for(const f of files.slice(0,12)){
       const t=document.createElement('div');t.className='thumb';
@@ -278,14 +278,15 @@
       more.textContent='+'+(files.length-12);thumbs.appendChild(more);
     }
 
-    // EXIF撮影日を読む（JPG中心。読めたものの最新を採用）
+    // EXIF撮影日を読む（JPG中心。読めたものの最新を採用。HEIC等は更新日にフォールバック）
+    let latest=null;
     for(const f of files){
       let dt=null;
       try{
         const ex=await exifr.parse(f,['DateTimeOriginal']);
         if(ex&&ex.DateTimeOriginal) dt=new Date(ex.DateTimeOriginal);
-      }catch(e){/* HEIC等は読めないことがある */}
-      if(!dt) dt=new Date(f.lastModified); // フォールバック
+      }catch(e){}
+      if(!dt) dt=new Date(f.lastModified);
       if(!latest||dt>latest) latest=dt;
     }
     if(latest){
@@ -293,29 +294,24 @@
       latestShootYM=`${y}-${m}`;
     }
 
-    // 送信済み判定（内容ハッシュで照合）
+    // 受取済み判定（内容ハッシュで照合）
     let doneCount = 0;
-    for(const f of files){
-      const h = await hash6(f);
-      if(uploadedSet[h]) doneCount++;
-    }
+    for(const f of files){ if(uploadedSet[await hash6(f)]) doneCount++; }
     const pendingCount = files.length - doneCount;
-    if(doneCount > 0){
-      count.textContent = `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`;
-    }else{
-      count.textContent = files.length+' 枚を選びました';
-    }
+    count.textContent = doneCount>0
+      ? `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`
+      : `${files.length} 枚を選びました`;
     selected.classList.add('show');
     send.disabled=false;
   }
 
-  // ---------- 送信 ----------
+  // ---------- 送信（直接Driveアップロード） ----------
   send.addEventListener('click', upload);
 
   async function upload(){
     if(!files.length) return;
 
-    // 内容ハッシュで「未送信ファイル」だけを対象にする
+    // 未送信ファイルだけを対象にする（成功済みは uploadedSet に入るので再送時に自動で除外）
     const pending = [];
     for(const f of files){
       const h = await hash6(f);
@@ -332,111 +328,137 @@
     $('progress').classList.add('show');
     const barFill=$('barFill'), progressTxt=$('progressTxt');
 
-    const BATCH=2;
-    let done=0;
-
-    if(already>0){
-      progressTxt.textContent=`すでに ${already}枚 受け取り済み。残り ${pending.length}枚 を送ります…`;
+    // ① 受付準備：合言葉でGASから「保存先フォルダ」と「一時鍵」をもらう
+    progressTxt.textContent='受付の準備をしています…';
+    let token, folderId;
+    try{
+      const prep = await prepare(latestShootYM);
+      token = prep.token; folderId = prep.folderId;
+    }catch(err){
+      progressTxt.textContent='準備に失敗しました（'+err.message+'）。電波のよい場所でもう一度お試しください。';
+      send.disabled=false; return;
     }
 
-    try{
-      for(let i=0;i<pending.length;i+=BATCH){
-        const chunk=pending.slice(i,i+BATCH);
+    // ② 写真をそのまま（バイナリ）Driveへ直接アップロード。
+    //    複数を同時並行（CONCURRENCY）で送り、1枚ごとにDriveから保存成功の返事をもらう。
+    const CONCURRENCY = 4;
+    let done = 0;
+    const failed = [];
+    let idx = 0;
 
-        progressTxt.textContent=`写真を準備しています… (${already+done+1}枚目〜)`;
+    const getToken = () => token;
+    const setToken = t => { token = t; };
 
-        const payloadStr = JSON.stringify({
-          school:SCHOOL_CODE, pass:PASS, shootDate:latestShootYM,
-          files: await Promise.all(chunk.map(async f=>({
-            name:f.name, mimeType:f.type,
-            hash: await hash6(f),
-            data: await toBase64(f)
-          })))
-        });
-
-        progressTxt.textContent=`送信中… ${already+done}/${files.length}枚`;
-
-        // ★ POSTは「投げっぱなし」 ★
-        // ・応答は読まない（この環境では応答読み取りで詰まる）
-        // ・途中で切らない（abortしない）。リクエストはサーバーに届き保存される。
-        // 　＝6:09に24.8秒のdoPostが実際に保存できた、あの確実な届き方に戻す。
-        fetch(GAS_URL, {
-          method:'POST',
-          mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body: payloadStr
-        }).catch(()=>{ /* 応答は使わないので握りつぶす */ });
-
-        // 保存できたかは「確実に通るGETのstatus照会」で粘り強く確認する。
-        // 経過秒を出しながら最大3分待ち、確認できたら即・成功へ進む。
-        const confirmed = await verifySaved(chunk);
-        if(!confirmed) throw new Error('保存の確認がとれませんでした');
-
-        for(const f of chunk){ uploadedSet[await hash6(f)] = true; }
-        done+=chunk.length;
-
-        const totalDone = already + done;
-        const pct=Math.round(totalDone/files.length*100);
-        barFill.style.width=pct+'%';
-        progressTxt.textContent=`送っています… ${totalDone}/${files.length}枚`;
+    async function worker(){
+      while(idx < pending.length){
+        const f = pending[idx++];
+        const ok = await uploadOne(f, folderId, getToken, setToken);
+        if(ok){
+          uploadedSet[await hash6(f)] = true;   // ✓ Drive本体が保存を確認した分だけ
+          done++;
+        }else{
+          failed.push(f);
+        }
+        const total = already + done;
+        barFill.style.width = Math.round(total/files.length*100)+'%';
+        progressTxt.textContent = `送っています… ${total}/${files.length}枚`;
       }
+    }
+
+    await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
+
+    // ③ 全数照合：失敗が1枚も無ければ完了。あれば残りを再送できるようにする。
+    if(failed.length === 0){
       $('done').classList.add('show');
-    }catch(err){
-      const totalDone = already + done;
-      progressTxt.textContent=
-        `${totalDone}/${files.length}枚 まで届いています。`+
-        `もう一度「続きを送る」を押すと、残りから送れます。`;
+    }else{
+      const total = already + done;
+      progressTxt.textContent =
+        `${total}/${files.length}枚 たしかに届きました。残り ${failed.length}枚 が未達です。`+
+        `「続きを送る」を押すと、未達の分だけ送り直します。`;
       send.disabled=false;
       send.textContent='続きを送る';
     }
   }
 
+  /** GASから保存先フォルダIDと一時鍵を取得 */
+  async function prepare(ym){
+    const res = await fetch(
+      `${GAS_URL}?action=prepare&school=${encodeURIComponent(SCHOOL_CODE)}`+
+      `&pass=${encodeURIComponent(PASS)}&ym=${encodeURIComponent(ym||'')}&t=${Date.now()}`
+    );
+    const d = await res.json();
+    if(!d || !d.ok || !d.token || !d.folderId){
+      throw new Error((d && d.error) || 'no token/folder');
+    }
+    return d;
+  }
+
   /**
-   * 送ったチャンクが本当にDriveに保存されたかを、status照会で検証する。
-   * POSTの応答は読まない設計なので、保存の成否はこの「確実に通るGET」で確かめる。
-   * 成功すれば即座に抜ける。最大90秒まで待つ（doPostが遅い場合の保険）。
+   * 1枚をDriveへアップロード。成功=trueを返す。
+   * ・最大3回まで再試行
+   * ・鍵切れ(401)のときは prepare で鍵を取り直して続行
    */
-  async function verifySaved(chunk){
-    const want = [];
-    for(const f of chunk){ want.push(await hash6(f)); }
+  async function uploadOne(file, folderId, getToken, setToken){
+    const h = await hash6(file);
+    const saveName = makeSaveName(file.name, h);
+    let triedRefresh = false;
 
-    const t0 = Date.now();
-    const DEADLINE = t0 + 180000; // 最大3分（保存が確認できれば即抜け）
-    await sleep(1500); // doPostが動き出す猶予を少しだけ与える
-
-    while(Date.now() < DEADLINE){
-      const sec = Math.floor((Date.now()-t0)/1000);
-      $('progressTxt').textContent = `保存を確認しています…（${sec}秒）少しお待ちください`;
+    for(let attempt=0; attempt<3; attempt++){
       try{
-        // t= はキャッシュ避け。古いハッシュ一覧を掴まないようにする。
-        const res = await fetch(
-          `${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}`+
-          `&pass=${encodeURIComponent(PASS)}&t=${Date.now()}`
-        );
-        const d = await res.json();
-        if(d && d.ok){
-          const have = {};
-          (d.uploadedHashes||[]).forEach(h=>have[h]=true);
-          if(want.every(h=>have[h])) return true; // チャンク全部が保存済み＝成功
+        const res = await driveUpload(file, saveName, folderId, getToken());
+        if(res.ok) return true;                      // 201/200 = 保存成功
+        if(res.status === 401 && !triedRefresh){     // 鍵切れ → 取り直し
+          triedRefresh = true;
+          const fresh = await prepare(latestShootYM);
+          setToken(fresh.token);
+          continue;
         }
-      }catch(e){ /* 一時的な失敗はリトライで吸収 */ }
-      await sleep(2500);
+        // それ以外のエラーは少し待って再試行
+      }catch(e){ /* 通信エラー：再試行 */ }
+      await sleep(800*(attempt+1));
     }
     return false;
   }
 
-  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-  function toBase64(file){
-    return new Promise((resolve,reject)=>{
-      const r=new FileReader();
-      r.onload=()=>resolve(r.result.split(',')[1]);
-      r.onerror=reject;
-      r.readAsDataURL(file);
-    });
+  /**
+   * Drive REST API へ multipart で直接アップロード（base64を使わず、写真の実体をそのまま送る）。
+   * メタ情報(ファイル名・保存先フォルダ)と画像本体を1リクエストで送る。
+   */
+  function driveUpload(file, name, folderId, token){
+    const boundary = '----hpcanvas' + Math.random().toString(16).slice(2);
+    const meta = { name: name, parents: [folderId] };
+    const body = new Blob([
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
+      JSON.stringify(meta),
+      `\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`,
+      file,                                  // ← 画像の実体（バイナリ）をそのまま
+      `\r\n--${boundary}--`
+    ]);
+    return fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+      {
+        method:'POST',
+        headers:{
+          'Authorization':'Bearer '+token,
+          'Content-Type':'multipart/related; boundary='+boundary
+        },
+        body: body
+      }
+    );
   }
 
-  // ファイル内容からSHA-256の先頭6桁を計算（送信済み判定に使う）
+  /** 保存名：元名_ハッシュ6桁.拡張子（衝突回避＆受取済み判定の目印） */
+  function makeSaveName(name, h){
+    const short = (h||'').substring(0,6);
+    const dot = name.lastIndexOf('.');
+    const base = dot>0 ? name.substring(0,dot) : name;
+    const ext  = dot>0 ? name.substring(dot) : '';
+    return `${base}_${short}${ext}`;
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  /** ファイル内容からSHA-256の先頭6桁（受取済み判定・保存名に使用） */
   async function hash6(file){
     if(fileHashes.has(file)) return fileHashes.get(file);
     const buf = await file.arrayBuffer();
@@ -447,9 +469,6 @@
     fileHashes.set(file, h);
     return h;
   }
-
-  // 園名を仮表示（ゲート前）
-  if(SCHOOL_CODE) $('gateSchool').textContent='合言葉を入力してください';
 </script>
 </body>
 </html>

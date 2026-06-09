@@ -129,6 +129,20 @@
     margin-top:26px;padding:12px 30px;border-radius:12px;border:1px solid var(--line);
     background:#fff;color:var(--ink);font-family:inherit;font-size:.9rem;cursor:pointer;
   }
+  .folderBtn{
+    width:100%; margin-top:10px; padding:13px; border:1px solid var(--line);
+    border-radius:14px; background:#fff; color:var(--accent-deep);
+    font-family:inherit; font-size:.92rem; font-weight:700; cursor:pointer; transition:.2s;
+  }
+  .folderBtn:hover{background:#fdf6ea; transform:translateY(-1px);}
+  .classlist{margin:-10px 0 22px;}
+  .clsrow{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    font-size:.82rem; padding:8px 14px; border:1px solid var(--line);
+    border-radius:10px; background:#fffefb; margin-top:6px;
+  }
+  .clsrow .clsname{font-weight:700;color:var(--ink);}
+  .clsrow .clsmeta{color:var(--sub); white-space:nowrap;}
   .hidden{display:none !important;}
 </style>
 </head>
@@ -163,12 +177,16 @@
       </div>
     </div>
 
+    <div class="classlist" id="classStatus"></div>
+
     <label class="drop" id="drop" for="fileInput">
       <div class="ico">📷</div>
       <div class="big">ここに写真を入れてください</div>
       <div class="small">タップして選ぶ／ドラッグでもOK（JPG・HEIC対応）</div>
     </label>
     <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
+    <input type="file" id="folderInput" webkitdirectory multiple style="display:none">
+    <button type="button" class="folderBtn" id="folderBtn">📁 クラスフォルダごと選ぶ（パソコン推奨）</button>
 
     <div class="selected" id="selected">
       <h4>選ばれた写真</h4>
@@ -184,7 +202,8 @@
     <button class="send" id="send" disabled>この写真を送る</button>
 
     <div class="help">
-      迷ったときは、入れたい写真をぜんぶ選んで「送る」を押すだけで大丈夫です。<br>
+      パソコンなら「クラスフォルダごと選ぶ」で、クラス分けを保ったまま送れます。<br>
+      何度でも送ってOK。前に送った写真は自動で飛ばされるので、毎回フォルダごと選んで大丈夫です。<br>
       送信後はこのページを閉じていただいてかまいません。
     </div>
   </div>
@@ -241,6 +260,7 @@
         $('statusDate').textContent = 'まだ受け取りはありません';
         $('statusSuffix').textContent = '';
       }
+      renderClassStatus(d.classes || []);
       $('gate').classList.add('hidden');
       $('mainHead').classList.remove('hidden');
       $('mainCard').classList.remove('hidden');
@@ -249,11 +269,39 @@
     }
   }
 
+  /** クラスごとの「最新の受付状況」を表示 */
+  function renderClassStatus(classes){
+    const box = $('classStatus');
+    box.innerHTML = '';
+    classes.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'clsrow';
+      const meta = (c.lastDate ? c.lastDate + '分まで' : 'まだ') + '・' + (c.count || 0) + '枚';
+      row.innerHTML = `<span class="clsname">${escapeHtml(c.name)}</span>`
+                    + `<span class="clsmeta">${escapeHtml(meta)}</span>`;
+      box.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /** その写真が入っていたフォルダ名（＝クラス名）。直下にある場合は親フォルダ名。無ければ空。 */
+  function classOf(file){
+    const rel = file.webkitRelativePath || '';
+    const parts = rel.split('/').filter(Boolean);   // 例 ["5月","さくら組","IMG.jpg"]
+    return parts.length >= 2 ? parts[parts.length - 2] : '';
+  }
+
   // ---------- ファイル選択 ----------
   const fileInput=$('fileInput'), drop=$('drop'), selected=$('selected'),
         thumbs=$('thumbs'), count=$('count'), send=$('send');
 
   fileInput.addEventListener('change',e=>handle(e.target.files));
+  $('folderBtn').addEventListener('click',()=>$('folderInput').click());
+  $('folderInput').addEventListener('change',e=>handle(e.target.files));
   ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
   drop.addEventListener('drop',e=>handle(e.dataTransfer.files));
@@ -298,9 +346,19 @@
     let doneCount = 0;
     for(const f of files){ if(uploadedSet[await hash6(f)]) doneCount++; }
     const pendingCount = files.length - doneCount;
-    count.textContent = doneCount>0
+
+    // クラス内訳（フォルダごと選んだ場合）
+    const byCls = {};
+    for(const f of files){ const c = classOf(f) || '（フォルダなし）'; byCls[c] = (byCls[c]||0)+1; }
+    const clsKeys = Object.keys(byCls);
+    const hasClasses = clsKeys.some(k => k !== '（フォルダなし）');
+    const clsText = hasClasses
+      ? '　[ ' + clsKeys.map(k => `${k}：${byCls[k]}枚`).join(' / ') + ' ]'
+      : '';
+
+    count.textContent = (doneCount>0
       ? `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`
-      : `${files.length} 枚を選びました`;
+      : `${files.length} 枚を選びました`) + clsText;
     selected.classList.add('show');
     send.disabled=false;
   }
@@ -328,46 +386,51 @@
     $('progress').classList.add('show');
     const barFill=$('barFill'), progressTxt=$('progressTxt');
 
-    // ① 受付準備：合言葉でGASから「保存先フォルダ」と「一時鍵」をもらう
-    progressTxt.textContent='受付の準備をしています…';
-    let token, folderId;
-    try{
-      const prep = await prepare(latestShootYM);
-      token = prep.token; folderId = prep.folderId;
-    }catch(err){
-      progressTxt.textContent='準備に失敗しました（'+err.message+'）。電波のよい場所でもう一度お試しください。';
-      send.disabled=false; return;
-    }
+    // クラスごとにまとめる（フォルダ無しは '' = 園名/年月分 直下）
+    const groups = {};
+    for(const f of pending){ const c = classOf(f); (groups[c] = groups[c] || []).push(f); }
+    const clsList = Object.keys(groups);
 
-    // ② 写真をそのまま（バイナリ）Driveへ直接アップロード。
-    //    複数を同時並行（CONCURRENCY）で送り、1枚ごとにDriveから保存成功の返事をもらう。
-    const CONCURRENCY = 4;
     let done = 0;
     const failed = [];
-    let idx = 0;
+    const CONCURRENCY = 4;
 
-    const getToken = () => token;
-    const setToken = t => { token = t; };
+    const updateProgress = ()=>{
+      const total = already + done;
+      barFill.style.width = Math.round(total/files.length*100)+'%';
+      progressTxt.textContent = `送っています… ${total}/${files.length}枚`;
+    };
 
-    async function worker(){
-      while(idx < pending.length){
-        const f = pending[idx++];
-        const ok = await uploadOne(f, folderId, getToken, setToken);
-        if(ok){
-          uploadedSet[await hash6(f)] = true;   // ✓ Drive本体が保存を確認した分だけ
-          done++;
-        }else{
-          failed.push(f);
-        }
-        const total = already + done;
-        barFill.style.width = Math.round(total/files.length*100)+'%';
-        progressTxt.textContent = `送っています… ${total}/${files.length}枚`;
+    // クラスごとに、保存先フォルダ＋鍵を取得 → そのフォルダへ並行アップロード
+    for(const cls of clsList){
+      progressTxt.textContent = (cls ? `「${cls}」の` : '') + '受付の準備をしています…';
+      let token, folderId;
+      try{
+        const prep = await prepare(latestShootYM, cls);
+        token = prep.token; folderId = prep.folderId;
+      }catch(err){
+        groups[cls].forEach(f => failed.push(f));   // 準備失敗→このクラスは未達扱い（後で再送可）
+        continue;
       }
+
+      const getToken = () => token;
+      const refresh  = async () => { const p = await prepare(latestShootYM, cls); token = p.token; };
+
+      const arr = groups[cls];
+      let idx = 0;
+      async function worker(){
+        while(idx < arr.length){
+          const f = arr[idx++];
+          const ok = await uploadOne(f, folderId, getToken, refresh);
+          if(ok){ uploadedSet[await hash6(f)] = true; done++; }
+          else   { failed.push(f); }
+          updateProgress();
+        }
+      }
+      await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
     }
 
-    await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
-
-    // ③ 全数照合：失敗が1枚も無ければ完了。あれば残りを再送できるようにする。
+    // 全数照合：失敗が1枚も無ければ完了。あれば残りを再送できるようにする。
     if(failed.length === 0){
       $('done').classList.add('show');
     }else{
@@ -380,11 +443,12 @@
     }
   }
 
-  /** GASから保存先フォルダIDと一時鍵を取得 */
-  async function prepare(ym){
+  /** GASから保存先フォルダID（園名/クラス/年月分）と一時鍵を取得 */
+  async function prepare(ym, cls){
     const res = await fetch(
       `${GAS_URL}?action=prepare&school=${encodeURIComponent(SCHOOL_CODE)}`+
-      `&pass=${encodeURIComponent(PASS)}&ym=${encodeURIComponent(ym||'')}&t=${Date.now()}`
+      `&pass=${encodeURIComponent(PASS)}&ym=${encodeURIComponent(ym||'')}`+
+      `&cls=${encodeURIComponent(cls||'')}&t=${Date.now()}`
     );
     const d = await res.json();
     if(!d || !d.ok || !d.token || !d.folderId){
@@ -396,9 +460,9 @@
   /**
    * 1枚をDriveへアップロード。成功=trueを返す。
    * ・最大3回まで再試行
-   * ・鍵切れ(401)のときは prepare で鍵を取り直して続行
+   * ・鍵切れ(401)のときは refresh() で鍵を取り直して続行
    */
-  async function uploadOne(file, folderId, getToken, setToken){
+  async function uploadOne(file, folderId, getToken, refresh){
     const h = await hash6(file);
     const saveName = makeSaveName(file.name, h);
     let triedRefresh = false;
@@ -409,8 +473,7 @@
         if(res.ok) return true;                      // 201/200 = 保存成功
         if(res.status === 401 && !triedRefresh){     // 鍵切れ → 取り直し
           triedRefresh = true;
-          const fresh = await prepare(latestShootYM);
-          setToken(fresh.token);
+          await refresh();
           continue;
         }
         // それ以外のエラーは少し待って再試行

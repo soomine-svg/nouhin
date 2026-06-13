@@ -129,6 +129,19 @@
     margin-top:26px;padding:12px 30px;border-radius:12px;border:1px solid var(--line);
     background:#fff;color:var(--ink);font-family:inherit;font-size:.9rem;cursor:pointer;
   }
+  .memo{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);}
+  .memo-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px;}
+  .memo-label{width:62px; font-size:.85rem; color:var(--sub); font-weight:700;}
+  .memo-input{
+    flex:1; min-width:120px; padding:10px 12px; border:1px solid var(--line);
+    border-radius:10px; font-family:inherit; font-size:1rem;
+  }
+  .memo-input:disabled{background:#f0ece3; color:var(--sub);}
+  .memo-check{
+    font-size:.78rem; color:var(--ink); display:flex; align-items:center;
+    gap:4px; white-space:nowrap; cursor:pointer;
+  }
+  .dest{margin-top:14px; font-size:.86rem; color:var(--accent-deep); font-weight:700; min-height:1.2em;}
   .folderBtn{
     width:100%; margin-top:10px; padding:13px; border:1px solid var(--line);
     border-radius:14px; background:#fff; color:var(--accent-deep);
@@ -173,7 +186,7 @@
       <div class="dot">🕊️</div>
       <div class="txt">
         <b id="statusDate">―</b> <span id="statusSuffix"></span>
-        <p>最新の撮影日をもとに自動表示しています</p>
+        <p>受け取った写真をもとに自動で表示しています</p>
       </div>
     </div>
 
@@ -186,12 +199,26 @@
     </label>
     <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
     <input type="file" id="folderInput" webkitdirectory multiple style="display:none">
-    <button type="button" class="folderBtn" id="folderBtn">📁 クラスフォルダごと選ぶ（パソコン推奨）</button>
+    <button type="button" class="folderBtn" id="folderBtn">📁 フォルダごと選ぶ（パソコン推奨）</button>
 
     <div class="selected" id="selected">
       <h4>選ばれた写真</h4>
       <div class="thumb-row" id="thumbs"></div>
       <div class="count" id="count"></div>
+
+      <div class="memo" id="memo">
+        <div class="memo-row">
+          <label class="memo-label">クラス名</label>
+          <input type="text" id="klassInput" class="memo-input" placeholder="例：A組">
+          <label class="memo-check"><input type="checkbox" id="klassSame"> フォルダ名と同じ</label>
+        </div>
+        <div class="memo-row">
+          <label class="memo-label">行事名</label>
+          <input type="text" id="eventInput" class="memo-input" placeholder="例：遠足">
+          <label class="memo-check"><input type="checkbox" id="eventSame"> フォルダ名と同じ</label>
+        </div>
+        <div class="dest" id="dest"></div>
+      </div>
     </div>
 
     <div class="progress" id="progress">
@@ -202,9 +229,10 @@
     <button class="send" id="send" disabled>この写真を送る</button>
 
     <div class="help">
-      パソコンなら「クラスフォルダごと選ぶ」で、クラス分けを保ったまま送れます。<br>
-      何度でも送ってOK。前に送った写真は自動で飛ばされるので、毎回フォルダごと選んで大丈夫です。<br>
-      送信後はこのページを閉じていただいてかまいません。
+      パソコンで「フォルダごと選ぶ」→ <b>一番下の階層のフォルダ</b>（例：遠足）を選んでください。<br>
+      クラス名・行事名を入力。選んだフォルダ名と同じ欄は「フォルダ名と同じ」にチェックすれば入力不要です。<br>
+      （選んだフォルダ名がどちらにも当てはまらないときは、両方とも手で入力してください）<br>
+      何度でも送れます。前に送った写真は自動で飛ばされます。送信後はページを閉じてかまいません。
     </div>
   </div>
 
@@ -217,8 +245,6 @@
     <button onclick="location.reload()">とじる</button>
   </div>
 
-<!-- EXIF撮影日を読むためのライブラリ -->
-<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js"></script>
 <script>
   // ============================================================
   //  設定：GASのウェブアプリURL
@@ -230,8 +256,9 @@
   const SCHOOL_CODE = params.get('school') || '';
 
   let PASS = '';
+  let SCHOOL_NAME = '';          // 認証後にGASから受け取る園名
   let files = [];               // 今回選ばれたファイル（再送時もそのまま使い回す）
-  let latestShootYM = null;     // 最新撮影年月 "2026-05"
+  let selectedFolderName = '';  // 選んだ一番下のフォルダ名（「フォルダ名と同じ」用）
   let uploadedSet = {};         // 受取済みの内容ハッシュ(先頭6桁) { hash6: true }
   let fileHashes = new Map();   // File -> hash6 のキャッシュ
 
@@ -250,6 +277,7 @@
       const d = await res.json();
       if(!d.ok){ $('gateErr').textContent = d.error || '合言葉が違うようです'; return; }
       PASS = pass;
+      SCHOOL_NAME = d.schoolName || '';
       uploadedSet = {};
       (d.uploadedHashes || []).forEach(h => uploadedSet[String(h).toLowerCase()] = true);
       $('schoolName').textContent = d.schoolName;
@@ -288,11 +316,14 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  /** その写真が入っていたフォルダ名（＝クラス名）。直下にある場合は親フォルダ名。無ければ空。 */
-  function classOf(file){
-    const rel = file.webkitRelativePath || '';
-    const parts = rel.split('/').filter(Boolean);   // 例 ["5月","さくら組","IMG.jpg"]
-    return parts.length >= 2 ? parts[parts.length - 2] : '';
+  /** 選んだ（一番下の）フォルダの名前。webkitRelativePathの先頭＝選択フォルダ名。無ければ空。 */
+  function folderNameFromFiles(list){
+    for(const f of list){
+      const rel = f.webkitRelativePath || '';
+      const parts = rel.split('/').filter(Boolean);
+      if(parts.length >= 2) return parts[parts.length - 2]; // ファイルの直上フォルダ＝選んだ一番下のフォルダ
+    }
+    return '';
   }
 
   // ---------- ファイル選択 ----------
@@ -326,41 +357,55 @@
       more.textContent='+'+(files.length-12);thumbs.appendChild(more);
     }
 
-    // EXIF撮影日を読む（JPG中心。読めたものの最新を採用。HEIC等は更新日にフォールバック）
-    let latest=null;
-    for(const f of files){
-      let dt=null;
-      try{
-        const ex=await exifr.parse(f,['DateTimeOriginal']);
-        if(ex&&ex.DateTimeOriginal) dt=new Date(ex.DateTimeOriginal);
-      }catch(e){}
-      if(!dt) dt=new Date(f.lastModified);
-      if(!latest||dt>latest) latest=dt;
-    }
-    if(latest){
-      const y=latest.getFullYear(), m=String(latest.getMonth()+1).padStart(2,'0');
-      latestShootYM=`${y}-${m}`;
-    }
+    // 選んだフォルダ名（チェックボックス用）を記録
+    selectedFolderName = folderNameFromFiles(files);
 
     // 受取済み判定（内容ハッシュで照合）
     let doneCount = 0;
     for(const f of files){ if(uploadedSet[await hash6(f)]) doneCount++; }
     const pendingCount = files.length - doneCount;
 
-    // クラス内訳（フォルダごと選んだ場合）
-    const byCls = {};
-    for(const f of files){ const c = classOf(f) || '（フォルダなし）'; byCls[c] = (byCls[c]||0)+1; }
-    const clsKeys = Object.keys(byCls);
-    const hasClasses = clsKeys.some(k => k !== '（フォルダなし）');
-    const clsText = hasClasses
-      ? '　[ ' + clsKeys.map(k => `${k}：${byCls[k]}枚`).join(' / ') + ' ]'
-      : '';
-
-    count.textContent = (doneCount>0
+    count.textContent = doneCount>0
       ? `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`
-      : `${files.length} 枚を選びました`) + clsText;
+      : `${files.length} 枚を選びました`;
+
+    // 「フォルダ名と同じ」がチェック済みなら、選んだフォルダ名を反映
+    applySameAsFolder();
+
     selected.classList.add('show');
-    send.disabled=false;
+    $('memo').style.display = 'block';
+    updateDest();
+  }
+
+  // ---------- メモ欄（クラス名・行事名）と「フォルダ名と同じ」 ----------
+  const klassInput=$('klassInput'), eventInput=$('eventInput');
+  const klassSame=$('klassSame'), eventSame=$('eventSame');
+
+  // チェックは排他（選んだフォルダ名は1つなので、両方には入れない）
+  klassSame.addEventListener('change', ()=>{ if(klassSame.checked) eventSame.checked=false; applySameAsFolder(); updateDest(); });
+  eventSame.addEventListener('change', ()=>{ if(eventSame.checked) klassSame.checked=false; applySameAsFolder(); updateDest(); });
+  klassInput.addEventListener('input', updateDest);
+  eventInput.addEventListener('input', updateDest);
+
+  /** 「フォルダ名と同じ」にチェックがある欄へ、選んだフォルダ名を入れて編集不可にする */
+  function applySameAsFolder(){
+    if(klassSame.checked){ klassInput.value = selectedFolderName; klassInput.disabled = true; }
+    else { klassInput.disabled = false; }
+    if(eventSame.checked){ eventInput.value = selectedFolderName; eventInput.disabled = true; }
+    else { eventInput.disabled = false; }
+  }
+
+  /** 保存先プレビュー更新＆送信ボタンの有効/無効 */
+  function updateDest(){
+    const k = klassInput.value.trim(), ev = eventInput.value.trim();
+    const dest = $('dest');
+    if(k && ev){
+      dest.textContent = `保存先：${SCHOOL_NAME||'園名'} / ${k} / ${ev}`;
+      send.disabled = false;
+    }else{
+      dest.textContent = 'クラス名と行事名を入力してください';
+      send.disabled = true;
+    }
   }
 
   // ---------- 送信（直接Driveアップロード） ----------
@@ -386,10 +431,16 @@
     $('progress').classList.add('show');
     const barFill=$('barFill'), progressTxt=$('progressTxt');
 
-    // クラスごとにまとめる（フォルダ無しは '' = 園名/年月分 直下）
-    const groups = {};
-    for(const f of pending){ const c = classOf(f); (groups[c] = groups[c] || []).push(f); }
-    const clsList = Object.keys(groups);
+    // 保存先＝クラス/行事（メモ欄から）。フォルダ名に使えない文字は除去。
+    const klass = sanitizeName(klassInput.value);
+    const event = sanitizeName(eventInput.value);
+    if(!klass || !event){
+      $('progress').classList.remove('show');
+      send.disabled = false;
+      $('dest').textContent = 'クラス名と行事名を入力してください';
+      return;
+    }
+    const path = `${klass}/${event}`;
 
     let done = 0;
     const failed = [];
@@ -401,34 +452,31 @@
       progressTxt.textContent = `送っています… ${total}/${files.length}枚`;
     };
 
-    // クラスごとに、保存先フォルダ＋鍵を取得 → そのフォルダへ並行アップロード
-    for(const cls of clsList){
-      progressTxt.textContent = (cls ? `「${cls}」の` : '') + '受付の準備をしています…';
-      let token, folderId;
-      try{
-        const prep = await prepare(latestShootYM, cls);
-        token = prep.token; folderId = prep.folderId;
-      }catch(err){
-        groups[cls].forEach(f => failed.push(f));   // 準備失敗→このクラスは未達扱い（後で再送可）
-        continue;
-      }
-
-      const getToken = () => token;
-      const refresh  = async () => { const p = await prepare(latestShootYM, cls); token = p.token; };
-
-      const arr = groups[cls];
-      let idx = 0;
-      async function worker(){
-        while(idx < arr.length){
-          const f = arr[idx++];
-          const ok = await uploadOne(f, folderId, getToken, refresh);
-          if(ok){ uploadedSet[await hash6(f)] = true; done++; }
-          else   { failed.push(f); }
-          updateProgress();
-        }
-      }
-      await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
+    // 受付準備（保存先 園名/クラス/行事 ＋ 一時鍵）
+    progressTxt.textContent = '受付の準備をしています…';
+    let token, folderId;
+    try{
+      const prep = await prepare(path);
+      token = prep.token; folderId = prep.folderId;
+    }catch(err){
+      progressTxt.textContent = '準備に失敗しました（'+err.message+'）。電波のよい場所でもう一度お試しください。';
+      send.disabled=false; return;
     }
+    const getToken = () => token;
+    const refresh  = async () => { const p = await prepare(path); token = p.token; };
+
+    // 直接Driveアップロード（保存先＝園名/クラス/行事。ファイル名は 元名_目印 のみ）
+    let idx = 0;
+    async function worker(){
+      while(idx < pending.length){
+        const f = pending[idx++];
+        const ok = await uploadOne(f, folderId, getToken, refresh);
+        if(ok){ uploadedSet[await hash6(f)] = true; done++; }
+        else   { failed.push(f); }
+        updateProgress();
+      }
+    }
+    await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
 
     // 全数照合：失敗が1枚も無ければ完了。あれば残りを再送できるようにする。
     if(failed.length === 0){
@@ -443,12 +491,12 @@
     }
   }
 
-  /** GASから保存先フォルダID（園名/クラス/年月分）と一時鍵を取得 */
-  async function prepare(ym, cls){
+  /** GASから保存先フォルダID（園名/クラス/行事）と一時鍵を取得 */
+  async function prepare(path){
     const res = await fetch(
       `${GAS_URL}?action=prepare&school=${encodeURIComponent(SCHOOL_CODE)}`+
-      `&pass=${encodeURIComponent(PASS)}&ym=${encodeURIComponent(ym||'')}`+
-      `&cls=${encodeURIComponent(cls||'')}&t=${Date.now()}`
+      `&pass=${encodeURIComponent(PASS)}`+
+      `&path=${encodeURIComponent(path||'')}&t=${Date.now()}`
     );
     const d = await res.json();
     if(!d || !d.ok || !d.token || !d.folderId){
@@ -517,6 +565,16 @@
     const base = dot>0 ? name.substring(0,dot) : name;
     const ext  = dot>0 ? name.substring(dot) : '';
     return `${base}_${short}${ext}`;
+  }
+
+  /** フォルダ名に使えない記号を取り除く（クラス名・行事名の掃除用） */
+  function sanitizeName(s){
+    return (s||'')
+      .trim()
+      .replace(/[\\\/:*?"<>|]/g,'')   // / \ : * ? " < > | は使えないので除去
+      .replace(/\s+/g,' ')             // 連続した空白は1つにまとめる
+      .replace(/^\.+|\.+$/g,'')        // 先頭・末尾のドットを除去
+      .trim();
   }
 
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }

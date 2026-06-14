@@ -28,7 +28,6 @@
     font-family:'Shippori Mincho',serif; font-size:1.9rem;
     letter-spacing:.08em; color:var(--accent-deep);
   }
-  .brand .logo span{color:var(--accent-deep);}
   .tagline{
     font-family:'Shippori Mincho',serif; font-size:.92rem;
     color:var(--sub); margin-top:8px; letter-spacing:.04em;
@@ -57,51 +56,101 @@
   }
   .status .txt b{font-size:1.02rem;color:var(--ink);}
   .status .txt p{font-size:.8rem;color:var(--sub);}
+
+  .classlist{margin:-10px 0 22px;}
+  .clsrow{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    font-size:.82rem; padding:8px 14px; border:1px solid var(--line);
+    border-radius:10px; background:#fffefb; margin-top:6px;
+  }
+  .clsrow .clsname{font-weight:700;color:var(--ink);}
+  .clsrow .clsmeta{color:var(--sub); white-space:nowrap;}
+
   .drop{
-    border:2px dashed #d8cbb3; border-radius:18px; padding:40px 20px;
+    border:2px dashed #d8cbb3; border-radius:18px; padding:34px 20px;
     text-align:center; cursor:pointer; transition:.25s; background:#fffefb;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
   }
   .drop:hover,.drop.drag{border-color:var(--accent); background:#fdf6ea; transform:translateY(-1px);}
-  .drop .ico{font-size:2.6rem;}
-  .drop .big{font-size:1.12rem;font-weight:700;}
-  .drop .small{font-size:.82rem;color:var(--sub);}
-  #fileInput{display:none;}
-  .selected{margin-top:18px;display:none;}
-  .selected.show{display:block;}
-  .selected h4{font-size:.85rem;color:var(--sub);font-weight:500;margin-bottom:10px;}
-  .thumb-row{display:flex;flex-wrap:wrap;gap:8px;}
-  .thumb{
-    width:62px;height:62px;border-radius:10px;overflow:hidden;
-    border:1px solid var(--line);position:relative;background:#eee;
-    display:flex;align-items:center;justify-content:center;
-    font-size:.62rem;color:var(--sub);text-align:center;padding:2px;
+  .drop .ico{font-size:2.4rem;}
+  .drop .big{font-size:1.08rem;font-weight:700;}
+  .drop .small{font-size:.8rem;color:var(--sub);}
+  #folderInput,#fileInput{display:none;}
+  .folderBtn{
+    width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep)); color:#fff;
+    font-family:inherit; font-size:1.02rem; font-weight:700; letter-spacing:.04em;
+    cursor:pointer; transition:.2s; box-shadow:0 12px 24px -14px rgba(154,106,54,.8);
   }
-  .thumb img{width:100%;height:100%;object-fit:cover;}
-  .count{font-size:.85rem;color:var(--ink);margin-top:12px;font-weight:700;}
+  .folderBtn:hover{filter:brightness(1.04); transform:translateY(-1px);}
+  .looseBtn{
+    width:100%; margin-top:10px; padding:11px; border:1px solid var(--line);
+    border-radius:12px; background:#fff; color:var(--accent-deep);
+    font-family:inherit; font-size:.86rem; font-weight:700; cursor:pointer;
+  }
+  .looseBtn:hover{background:#fdf6ea;}
+
+  /* フォルダのチェックツリー */
+  .treewrap{margin-top:20px; display:none;}
+  .treewrap.show{display:block;}
+  .treewrap h4{font-size:.92rem; color:var(--ink); font-weight:700; margin-bottom:4px;}
+  .treewrap .hint{font-size:.78rem; color:var(--sub); margin-bottom:12px;}
+  .tree{
+    border:1px solid var(--line); border-radius:14px; padding:6px;
+    max-height:340px; overflow:auto; background:#fffefb;
+  }
+  .trow{display:flex; align-items:center; gap:8px; padding:7px 6px; border-radius:8px;}
+  .trow:hover{background:#fbf6ec;}
+  .ttoggle{width:16px; flex:0 0 16px; text-align:center; color:var(--sub);
+    cursor:pointer; font-size:.78rem; user-select:none;}
+  .tcheck{width:18px; height:18px; flex:0 0 18px; accent-color:var(--accent); cursor:pointer;}
+  .tname{flex:1; font-size:.9rem; color:var(--ink); cursor:pointer; word-break:break-all;}
+  .tcount{font-size:.75rem; color:var(--sub); white-space:nowrap;}
+
+  .selcount{font-size:.9rem; color:var(--accent-deep); font-weight:700; margin-top:14px; min-height:1.3em;}
+
+  .preview{margin-top:14px;}
+  .preview h4{font-size:.82rem; color:var(--sub); font-weight:500; margin-bottom:10px;}
+  .pvgroup{margin-bottom:14px;}
+  .pvhead{font-size:.82rem; color:var(--ink); font-weight:700; margin-bottom:6px; word-break:break-all;}
+  .pvhead .pc{color:var(--sub); font-weight:400;}
+  .thumb-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .thumb{
+    width:60px; height:60px; border-radius:10px; overflow:hidden;
+    border:1px solid var(--line); position:relative; background:#f1ece2;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.56rem; color:var(--sub); text-align:center; padding:3px;
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover;}
+  .thumb .ic{font-size:1.3rem; line-height:1;}
+  .thumb .nm{position:absolute; bottom:0; left:0; right:0; background:rgba(255,255,255,.82);
+    font-size:.5rem; padding:1px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
   .send{
-    width:100%; margin-top:22px; padding:18px; border:none; border-radius:16px;
+    width:100%; margin-top:20px; padding:18px; border:none; border-radius:16px;
     background:linear-gradient(180deg,var(--accent),var(--accent-deep));
-    color:#fff; font-family:'Zen Maru Gothic',sans-serif; font-size:1.12rem;
-    font-weight:700; letter-spacing:.08em; cursor:pointer;
+    color:#fff; font-family:inherit; font-size:1.1rem;
+    font-weight:700; letter-spacing:.06em; cursor:pointer;
     box-shadow:0 12px 24px -12px rgba(154,106,54,.8); transition:.2s;
   }
   .send:hover{filter:brightness(1.04);transform:translateY(-1px);}
-  .send:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .send:disabled{opacity:.4;cursor:not-allowed;transform:none;filter:none;}
+
   .progress{margin-top:16px;display:none;}
   .progress.show{display:block;}
   .bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;}
   .bar i{display:block;height:100%;width:0;background:var(--accent);transition:.3s;}
   .progress p{font-size:.8rem;color:var(--sub);margin-top:6px;text-align:center;}
-  .help{margin-top:20px;font-size:.82rem;color:var(--sub);line-height:1.85;}
+
+  .help{margin-top:22px;font-size:.82rem;color:var(--sub);line-height:1.85;}
   .help-title{font-weight:700;color:var(--ink);margin:0 0 10px;text-align:center;font-size:.9rem;}
-  .help-steps{margin:0;padding-left:1.5em;}
+  .help-steps{margin:0;padding-left:1.4em;}
   .help-steps li{margin-bottom:8px;}
   .help-steps b{color:var(--accent-deep);}
   .help-note{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:.78rem;line-height:1.8;}
   .footer{margin-top:34px;font-size:.72rem;color:#b3a991;letter-spacing:.06em;text-align:center;}
 
-  /* 合言葉入力ゲート */
+  /* 合言葉ゲート */
   .gate{
     width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);
     border-radius:22px;padding:30px 26px;margin-top:24px;text-align:center;
@@ -130,48 +179,20 @@
   .done .mark{font-size:3.4rem;margin-bottom:16px;}
   .done h2{font-family:'Shippori Mincho',serif;font-size:1.4rem;margin-bottom:10px;}
   .done p{color:var(--sub);font-size:.92rem;}
-  .done .btns{margin-top:26px; display:flex; flex-direction:column; gap:12px; width:100%; max-width:280px;}
+  .done .btns{margin-top:26px; display:flex; flex-direction:column; gap:12px; width:100%; max-width:300px;}
   .done button{
     padding:14px 30px;border-radius:12px;border:1px solid var(--line);
     background:#fff;color:var(--ink);font-family:inherit;font-size:.95rem;cursor:pointer;
   }
-  .done button.again{
-    background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;
-  }
-  .memo{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);}
-  .memo-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px;}
-  .memo-label{width:62px; font-size:.85rem; color:var(--sub); font-weight:700;}
-  .memo-input{
-    flex:1; min-width:120px; padding:10px 12px; border:1px solid var(--line);
-    border-radius:10px; font-family:inherit; font-size:1rem;
-  }
-  .memo-input:disabled{background:#f0ece3; color:var(--sub);}
-  .memo-check{
-    font-size:.78rem; color:var(--ink); display:flex; align-items:center;
-    gap:4px; white-space:nowrap; cursor:pointer;
-  }
-  .dest{margin-top:14px; font-size:.86rem; color:var(--accent-deep); font-weight:700; min-height:1.2em;}
-  .folderBtn{
-    width:100%; margin-top:10px; padding:13px; border:1px solid var(--line);
-    border-radius:14px; background:#fff; color:var(--accent-deep);
-    font-family:inherit; font-size:.92rem; font-weight:700; cursor:pointer; transition:.2s;
-  }
-  .folderBtn:hover{background:#fdf6ea; transform:translateY(-1px);}
-  .classlist{margin:-10px 0 22px;}
-  .clsrow{
-    display:flex; justify-content:space-between; align-items:center; gap:10px;
-    font-size:.82rem; padding:8px 14px; border:1px solid var(--line);
-    border-radius:10px; background:#fffefb; margin-top:6px;
-  }
-  .clsrow .clsname{font-weight:700;color:var(--ink);}
-  .clsrow .clsmeta{color:var(--sub); white-space:nowrap;}
+  .done button.again{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;}
+
   .hidden{display:none !important;}
 </style>
 </head>
 <body>
 
   <div class="brand">
-    <div class="logo">H.P.<span>canvas</span></div>
+    <div class="logo">H.P.canvas</div>
     <div class="tagline">今しか見られない瞬間を、未来へつなぐ宝物に</div>
   </div>
 
@@ -201,33 +222,23 @@
 
     <div class="classlist" id="classStatus"></div>
 
-    <label class="drop" id="drop" for="fileInput">
-      <div class="ico">📷</div>
-      <div class="big">ここに写真を入れてください</div>
-      <div class="small">タップして選ぶ／ドラッグでもOK（JPG・HEIC対応）</div>
+    <label class="drop" id="drop">
+      <div class="ico">📁</div>
+      <div class="big">フォルダを選んでください</div>
+      <div class="small">写真がまとまっている上のフォルダを選ぶと、中身を一覧で表示します</div>
     </label>
+    <input type="file" id="folderInput" webkitdirectory multiple>
     <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
-    <input type="file" id="folderInput" webkitdirectory multiple style="display:none">
-    <button type="button" class="folderBtn" id="folderBtn">📁 フォルダごと選ぶ（パソコン推奨）</button>
+    <button type="button" class="folderBtn" id="folderBtn">📁 フォルダを選ぶ</button>
+    <button type="button" class="looseBtn" id="looseBtn">写真を1枚ずつ選ぶ場合はこちら</button>
 
-    <div class="selected" id="selected">
-      <h4>選ばれた写真</h4>
-      <div class="thumb-row" id="thumbs"></div>
-      <div class="count" id="count"></div>
-
-      <div class="memo" id="memo">
-        <div class="memo-row">
-          <label class="memo-label">クラス名</label>
-          <input type="text" id="klassInput" class="memo-input" placeholder="例：A組">
-          <label class="memo-check"><input type="checkbox" id="klassSame"> フォルダ名と同じ</label>
-        </div>
-        <div class="memo-row">
-          <label class="memo-label">行事名</label>
-          <input type="text" id="eventInput" class="memo-input" placeholder="例：遠足">
-          <label class="memo-check"><input type="checkbox" id="eventSame"> フォルダ名と同じ</label>
-        </div>
-        <div class="dest" id="dest"></div>
-      </div>
+    <!-- フォルダのチェックツリー -->
+    <div class="treewrap" id="treewrap">
+      <h4>送るフォルダにチェックを入れてください</h4>
+      <p class="hint">▸ を押すと中が開きます。チェックを入れた分だけ送られます（前に送った写真は自動で飛ばします）。</p>
+      <div class="tree" id="tree"></div>
+      <div class="selcount" id="selcount"></div>
+      <div class="preview" id="preview"></div>
     </div>
 
     <div class="progress" id="progress">
@@ -235,16 +246,16 @@
       <p id="progressTxt">送っています…</p>
     </div>
 
-    <button class="send" id="send" disabled>この写真を送る</button>
+    <button class="send" id="send" disabled>チェックした写真を送る</button>
 
     <div class="help">
       <p class="help-title">写真の送り方</p>
       <ol class="help-steps">
-        <li>「フォルダごと選ぶ」で、<b>一番下の階層のフォルダ</b>（例：遠足）を選びます。</li>
-        <li>クラス名・行事名を入力します。選んだフォルダ名と同じ欄は「フォルダ名と同じ」にチェックすると入力を省けます。どちらにも当てはまらないときは、両方とも手で入力してください。</li>
-        <li>「この写真を送る」を押します。</li>
+        <li>「フォルダを選ぶ」で、写真がまとまっている<b>上のフォルダ</b>を1回クリックして選びます（開かずにそのままOKを押す）。</li>
+        <li>表示された一覧から、<b>送りたいフォルダにチェック</b>を入れます。親にチェックすると中身ぜんぶが選ばれます。</li>
+        <li>「チェックした写真を送る」を押します。</li>
       </ol>
-      <p class="help-note">何度でも送れます。前に送った写真は自動で飛ばされます。クラスごとに分けて送るときは、完了画面の「続けて送る」を押せば、合言葉を入れ直さずに次を送れます。</p>
+      <p class="help-note">園のフォルダの分け方そのままで保存されます。前に送った写真は自動で飛ばすので、何度送っても重複しません。続けて送るときは、完了画面の「続けて送る」で合言葉を入れ直さずに次へ進めます。</p>
     </div>
   </div>
 
@@ -266,18 +277,19 @@
   // ============================================================
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrBqR037fGAdDMa4p-FJCixHDOKjMZvFRuZlvQMb7DLXusc5WtOulVAGOpJB34mfngUA/exec';
 
-  // 園コードはURLのパラメータから取得（例: ?school=sakura）
   const params = new URLSearchParams(location.search);
   const SCHOOL_CODE = params.get('school') || '';
 
   let PASS = '';
-  let SCHOOL_NAME = '';          // 認証後にGASから受け取る園名
-  let files = [];               // 今回選ばれたファイル（再送時もそのまま使い回す）
-  let selectedFolderName = '';  // 選んだ一番下のフォルダ名（「フォルダ名と同じ」用）
-  let uploadedSet = {};         // 受取済みの内容ハッシュ(先頭6桁) { hash6: true }
-  let fileHashes = new Map();   // File -> hash6 のキャッシュ
+  let SCHOOL_NAME = '';
+  let receivedSet = new Set();   // 受取済みキー "位置/名前|サイズ"
+  let files = [];                // 今回選ばれた画像ファイル
+  let treeRoot = null;           // フォルダツリー
+  let stripContainer = false;    // 一番上の入れ物フォルダ名を保存先から外すか
+  let previewUrls = [];          // サムネイルのObjectURL（解放用）
 
   const $ = id => document.getElementById(id);
+  const enc = encodeURIComponent;
 
   // ---------- 合言葉ゲート ----------
   $('gateBtn').addEventListener('click', openGate);
@@ -288,13 +300,12 @@
     if(!pass){ $('gateErr').textContent='合言葉を入れてください'; return; }
     $('gateErr').textContent='確認しています…';
     try{
-      const res = await fetch(`${GAS_URL}?action=status&school=${encodeURIComponent(SCHOOL_CODE)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
+      const res = await fetch(`${GAS_URL}?action=status&school=${enc(SCHOOL_CODE)}&pass=${enc(pass)}&t=${Date.now()}`);
       const d = await res.json();
       if(!d.ok){ $('gateErr').textContent = d.error || '合言葉が違うようです'; return; }
       PASS = pass;
       SCHOOL_NAME = d.schoolName || '';
-      uploadedSet = {};
-      (d.uploadedHashes || []).forEach(h => uploadedSet[String(h).toLowerCase()] = true);
+      receivedSet = new Set(d.received || []);
       $('schoolName').textContent = d.schoolName;
       if(d.lastDate){
         $('statusDate').textContent = d.lastDate + '分';
@@ -312,7 +323,6 @@
     }
   }
 
-  /** クラスごとの「最新の受付状況」を表示 */
   function renderClassStatus(classes){
     const box = $('classStatus');
     box.innerHTML = '';
@@ -327,251 +337,345 @@
   }
 
   function escapeHtml(s){
-    return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  /** 選んだ（一番下の）フォルダの名前。webkitRelativePathの先頭＝選択フォルダ名。無ければ空。 */
-  function folderNameFromFiles(list){
-    for(const f of list){
-      const rel = f.webkitRelativePath || '';
-      const parts = rel.split('/').filter(Boolean);
-      if(parts.length >= 2) return parts[parts.length - 2]; // ファイルの直上フォルダ＝選んだ一番下のフォルダ
+  // ---------- ファイル/フォルダ選択 ----------
+  $('folderBtn').addEventListener('click', ()=>$('folderInput').click());
+  $('looseBtn').addEventListener('click', ()=>$('fileInput').click());
+  $('drop').addEventListener('click', ()=>$('folderInput').click());
+  $('folderInput').addEventListener('change', e=>handle(e.target.files));
+  $('fileInput').addEventListener('change', e=>handle(e.target.files));
+  ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag');}));
+  $('drop').addEventListener('drop', e=>{ e.preventDefault(); handle(e.dataTransfer.files); });
+
+  function isImageFile(f){
+    return (f.type||'').startsWith('image/') || /\.(jpe?g|png|heic|heif|gif|webp|bmp|tiff?)$/i.test(f.name);
+  }
+  function isHeic(f){
+    return /heic|heif/i.test(f.type||'') || /\.(heic|heif)$/i.test(f.name);
+  }
+
+  function handle(list){
+    files = Array.from(list).filter(isImageFile);
+    if(!files.length){
+      $('selcount').textContent = '画像ファイルが見つかりませんでした。';
+      $('treewrap').classList.add('show');
+      $('tree').innerHTML = ''; $('preview').innerHTML = '';
+      $('send').disabled = true;
+      return;
     }
-    return '';
+    // 一番上の入れ物フォルダを保存先から外すか（サブフォルダがある＝構造を保つときだけ外す）
+    stripContainer = files.some(f => folderSegsOf(f).length >= 2);
+    treeRoot = buildTree(files);
+    renderTree(treeRoot);
+    $('treewrap').classList.add('show');
+    $('send').textContent = 'チェックした写真を送る';
+    updatePreview();
   }
 
-  // ---------- ファイル選択 ----------
-  const fileInput=$('fileInput'), drop=$('drop'), selected=$('selected'),
-        thumbs=$('thumbs'), count=$('count'), send=$('send');
+  function folderSegsOf(file){
+    const segs = (file.webkitRelativePath || file.name).split('/').filter(Boolean);
+    return segs.slice(0, -1); // ファイル名を除いたフォルダ部分
+  }
+  /** その写真の保存先パス（園名フォルダの下）。入れ物を外す設定なら先頭を落とす。 */
+  function drivePathOf(file){
+    let segs = folderSegsOf(file);
+    if(stripContainer) segs = segs.slice(1);
+    return segs.join('/');
+  }
+  function keyOf(drivePath, file){
+    return (drivePath ? drivePath + '/' : '') + file.name + '|' + file.size;
+  }
 
-  fileInput.addEventListener('change',e=>handle(e.target.files));
-  $('folderBtn').addEventListener('click',()=>$('folderInput').click());
-  $('folderInput').addEventListener('change',e=>handle(e.target.files));
-  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
-  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
-  drop.addEventListener('drop',e=>handle(e.dataTransfer.files));
-
-  async function handle(list){
-    files=Array.from(list);
-    if(!files.length)return;
-    send.textContent='この写真を送る';
-    thumbs.innerHTML='';
-
-    for(const f of files.slice(0,12)){
-      const t=document.createElement('div');t.className='thumb';
-      if(f.type.startsWith('image/')&&!/heic|heif/i.test(f.name)){
-        const img=document.createElement('img');img.src=URL.createObjectURL(f);t.appendChild(img);
-      }else{
-        t.textContent=(f.name.split('.').pop()||'IMG').toUpperCase();
+  // ---------- ツリー構築 ----------
+  function buildTree(fileList){
+    const root = node('');
+    for(const f of fileList){
+      const segs = folderSegsOf(f);
+      let cur = root;
+      for(const s of segs){
+        if(!cur.children.has(s)) cur.children.set(s, node(s));
+        cur = cur.children.get(s);
       }
-      thumbs.appendChild(t);
+      cur.files.push(f);
     }
-    if(files.length>12){
-      const more=document.createElement('div');more.className='thumb';
-      more.textContent='+'+(files.length-12);thumbs.appendChild(more);
+    // フォルダ分けされていない写真は「（フォルダなし）」としてまとめる
+    if(root.files.length){
+      const ph = node('（フォルダなし）');
+      ph.files = root.files; root.files = [];
+      root.children.set('（フォルダなし）', ph);
     }
+    countFiles(root);
+    return root;
+  }
+  function node(name){ return { name, children:new Map(), files:[], count:0, checkState:'none', _cb:null, _childBox:null, _rendered:false }; }
+  function countFiles(n){ let c=n.files.length; n.children.forEach(ch=>c+=countFiles(ch)); n.count=c; return c; }
 
-    // 選んだフォルダ名（チェックボックス用）を記録
-    selectedFolderName = folderNameFromFiles(files);
+  // ---------- ツリー描画（子は開いた時に描く） ----------
+  function renderTree(root){
+    const box = $('tree'); box.innerHTML='';
+    root.children.forEach(ch => box.appendChild(renderNode(ch, 0)));
+  }
+  function renderNode(n, depth){
+    const wrap = document.createElement('div');
+    const row = document.createElement('div');
+    row.className='trow';
+    row.style.paddingLeft = (4 + depth*18) + 'px';
 
-    // 受取済み判定（内容ハッシュで照合）
-    let doneCount = 0;
-    for(const f of files){ if(uploadedSet[await hash6(f)]) doneCount++; }
-    const pendingCount = files.length - doneCount;
+    const hasChildren = n.children.size>0;
+    const tog = document.createElement('span'); tog.className='ttoggle'; tog.textContent = hasChildren ? '▸' : '';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.className='tcheck';
+    const nm = document.createElement('span'); nm.className='tname'; nm.textContent = n.name;
+    const ct = document.createElement('span'); ct.className='tcount'; ct.textContent = n.count + '枚';
+    row.append(tog, cb, nm, ct);
+    wrap.appendChild(row);
 
-    count.textContent = doneCount>0
-      ? `${files.length} 枚を選びました（うち ${doneCount}枚 は受け取り済み・残り ${pendingCount}枚）`
-      : `${files.length} 枚を選びました`;
+    const childBox = document.createElement('div');
+    childBox.style.display='none';
+    wrap.appendChild(childBox);
+    n._cb = cb; n._childBox = childBox;
 
-    // 「フォルダ名と同じ」がチェック済みなら、選んだフォルダ名を反映
-    applySameAsFolder();
-
-    selected.classList.add('show');
-    $('memo').style.display = 'block';
-    updateDest();
+    if(hasChildren){
+      const toggle = ()=>{
+        if(!n._rendered){
+          n.children.forEach(ch => childBox.appendChild(renderNode(ch, depth+1)));
+          n._rendered = true;
+        }
+        const open = childBox.style.display==='none';
+        childBox.style.display = open ? 'block' : 'none';
+        tog.textContent = open ? '▾' : '▸';
+      };
+      tog.onclick = toggle;
+      nm.onclick = toggle;
+    }
+    cb.onchange = ()=>{ cascade(n, cb.checked ? 'all' : 'none'); afterCheck(); };
+    applyCheckUI(n);
+    return wrap;
   }
 
-  // ---------- メモ欄（クラス名・行事名）と「フォルダ名と同じ」 ----------
-  const klassInput=$('klassInput'), eventInput=$('eventInput');
-  const klassSame=$('klassSame'), eventSame=$('eventSame');
+  function cascade(n, state){ n.checkState = state; n.children.forEach(ch=>cascade(ch, state)); }
 
-  // チェックは排他（選んだフォルダ名は1つなので、両方には入れない）
-  klassSame.addEventListener('change', ()=>{ if(klassSame.checked) eventSame.checked=false; applySameAsFolder(); updateDest(); });
-  eventSame.addEventListener('change', ()=>{ if(eventSame.checked) klassSame.checked=false; applySameAsFolder(); updateDest(); });
-  klassInput.addEventListener('input', updateDest);
-  eventInput.addEventListener('input', updateDest);
-
-  /** 「フォルダ名と同じ」にチェックがある欄へ、選んだフォルダ名を入れて編集不可にする */
-  function applySameAsFolder(){
-    if(klassSame.checked){ klassInput.value = selectedFolderName; klassInput.disabled = true; }
-    else { klassInput.disabled = false; }
-    if(eventSame.checked){ eventInput.value = selectedFolderName; eventInput.disabled = true; }
-    else { eventInput.disabled = false; }
+  function recomputeState(n){
+    if(n.children.size===0) return n.checkState; // 末端は自分の状態
+    let all=true, none=true;
+    n.children.forEach(ch=>{
+      const s = recomputeState(ch);
+      if(s!=='all') all=false;
+      if(s!=='none') none=false;
+    });
+    n.checkState = all ? 'all' : (none ? 'none' : 'some');
+    return n.checkState;
+  }
+  function applyCheckUI(n){
+    if(n._cb){
+      n._cb.checked = n.checkState==='all';
+      n._cb.indeterminate = n.checkState==='some';
+    }
+    if(n._rendered) n.children.forEach(applyCheckUI);
+  }
+  function afterCheck(){
+    treeRoot.children.forEach(recomputeState);
+    treeRoot.children.forEach(applyCheckUI);
+    updatePreview();
   }
 
-  /** 保存先プレビュー更新＆送信ボタンの有効/無効 */
-  function updateDest(){
-    const k = klassInput.value.trim(), ev = eventInput.value.trim();
-    const dest = $('dest');
-    if(k && ev){
-      dest.textContent = `保存先：${SCHOOL_NAME||'園名'} / ${k} / ${ev}`;
-      send.disabled = false;
+  // ---------- 選択中ファイルの収集 ----------
+  function collectSelected(){
+    const out = [];
+    const rec = (n)=>{
+      if(n.checkState==='all'){ gather(n, out); }
+      else if(n.checkState==='some'){ n.children.forEach(rec); }
+    };
+    treeRoot.children.forEach(rec);
+    return out;
+  }
+  function gather(n, out){
+    n.files.forEach(f => out.push({ file:f, drivePath:drivePathOf(f) }));
+    n.children.forEach(ch => gather(ch, out));
+  }
+
+  // ---------- プレビュー（送る分・数枚だけサムネイル） ----------
+  function updatePreview(){
+    previewUrls.forEach(u=>URL.revokeObjectURL(u)); previewUrls = [];
+    const sel = collectSelected();
+
+    let pending = 0;
+    sel.forEach(s=>{ if(!receivedSet.has(keyOf(s.drivePath, s.file))) pending++; });
+    const done = sel.length - pending;
+
+    if(sel.length===0){
+      $('selcount').textContent = '';
+      $('send').disabled = true;
     }else{
-      dest.textContent = 'クラス名と行事名を入力してください';
-      send.disabled = true;
+      $('selcount').textContent = done>0
+        ? `送る写真：${pending}枚（ほかに ${done}枚 は受取済みで自動スキップ）`
+        : `送る写真：${pending}枚`;
+      $('send').disabled = pending===0;
+    }
+
+    // フォルダ別にまとめて、各フォルダ先頭4枚だけ表示
+    const groups = new Map();
+    sel.forEach(s=>{ const k=s.drivePath; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(s.file); });
+
+    const pv = $('preview'); pv.innerHTML = '';
+    if(groups.size===0) return;
+    const head = document.createElement('h4'); head.textContent='送る写真（確認）'; pv.appendChild(head);
+
+    let shown=0;
+    groups.forEach((arr, path)=>{
+      if(shown>=12){ return; }
+      shown++;
+      const g = document.createElement('div'); g.className='pvgroup';
+      const h = document.createElement('div'); h.className='pvhead';
+      h.innerHTML = `📁 ${escapeHtml(path || '（フォルダなし）')} <span class="pc">${arr.length}枚</span>`;
+      g.appendChild(h);
+      const row = document.createElement('div'); row.className='thumb-row';
+      arr.slice(0,4).forEach(f=>row.appendChild(makeThumb(f)));
+      if(arr.length>4){
+        const more=document.createElement('div'); more.className='thumb'; more.textContent='+'+(arr.length-4);
+        row.appendChild(more);
+      }
+      g.appendChild(row);
+      pv.appendChild(g);
+    });
+    if(groups.size>12){
+      const note=document.createElement('div'); note.className='pvhead';
+      note.style.color='var(--sub)'; note.textContent=`ほか ${groups.size-12} フォルダ`;
+      pv.appendChild(note);
     }
   }
 
-  // ---------- 送信（直接Driveアップロード） ----------
-  send.addEventListener('click', upload);
-
-  // 「続けて送る」：合言葉・受取済み判定は保ったまま、選択だけリセット（再ログイン不要）
-  $('againBtn').addEventListener('click', resetForNext);
-  function resetForNext(){
-    $('done').classList.remove('show');
-    files = [];
-    selectedFolderName = '';
-    thumbs.innerHTML = '';
-    count.textContent = '';
-    klassInput.value = ''; eventInput.value = '';
-    klassSame.checked = false; eventSame.checked = false;
-    klassInput.disabled = false; eventInput.disabled = false;
-    $('dest').textContent = '';
-    $('memo').style.display = 'none';
-    selected.classList.remove('show');
-    $('progress').classList.remove('show');
-    $('barFill').style.width = '0%';
-    send.textContent = 'この写真を送る';
-    send.disabled = true;
-    fileInput.value = ''; $('folderInput').value = '';   // 同じフォルダを選び直せるように
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function makeThumb(f){
+    const t = document.createElement('div'); t.className='thumb';
+    if(isHeic(f) || !(f.type||'').startsWith('image/')){
+      // ブラウザで表示できない形式（HEIC等）はアイコン＋名前で「在る」ことを示す
+      const ic=document.createElement('div'); ic.className='ic'; ic.textContent='🖼️';
+      const nm=document.createElement('div'); nm.className='nm'; nm.textContent=f.name;
+      t.append(ic, nm);
+    }else{
+      const url=URL.createObjectURL(f); previewUrls.push(url);
+      const img=document.createElement('img'); img.loading='lazy'; img.src=url;
+      img.onerror=()=>{ t.innerHTML=''; const ic=document.createElement('div'); ic.className='ic'; ic.textContent='🖼️'; t.appendChild(ic); };
+      t.appendChild(img);
+    }
+    return t;
   }
+
+  // ---------- 送信 ----------
+  $('send').addEventListener('click', upload);
 
   async function upload(){
-    if(!files.length) return;
+    const sel = collectSelected();
+    const pending = sel.filter(s=>!receivedSet.has(keyOf(s.drivePath, s.file)));
+    if(!pending.length){ $('done').classList.add('show'); return; }
 
-    // 未送信ファイルだけを対象にする（成功済みは uploadedSet に入るので再送時に自動で除外）
-    const pending = [];
-    for(const f of files){
-      const h = await hash6(f);
-      if(!uploadedSet[h]) pending.push(f);
-    }
-    const already = files.length - pending.length;
-
-    if(pending.length === 0){
-      $('done').classList.add('show');
-      return;
-    }
-
-    send.disabled=true;
+    $('send').disabled = true;
     $('progress').classList.add('show');
     const barFill=$('barFill'), progressTxt=$('progressTxt');
+    barFill.style.width='0%';
 
-    // 保存先＝クラス/行事（メモ欄から）。フォルダ名に使えない文字は除去。
-    const klass = sanitizeName(klassInput.value);
-    const event = sanitizeName(eventInput.value);
-    if(!klass || !event){
-      $('progress').classList.remove('show');
-      send.disabled = false;
-      $('dest').textContent = 'クラス名と行事名を入力してください';
-      return;
-    }
-    const path = `${klass}/${event}`;
+    // 鍵と園名フォルダIDを取得
+    progressTxt.textContent='受付の準備をしています…';
+    let token, rootId;
+    try{ const p = await prepare(); token=p.token; rootId=p.rootId; }
+    catch(err){ progressTxt.textContent='準備に失敗しました（'+err.message+'）。電波のよい場所でもう一度お試しください。'; $('send').disabled=false; return; }
+    const getToken = ()=>token;
+    const refresh  = async ()=>{ const p=await prepare(); token=p.token; rootId=p.rootId; };
 
-    let done = 0;
-    const failed = [];
-    const CONCURRENCY = 4;
+    // 保存先フォルダ（園の階層）をブラウザ側で作る
+    progressTxt.textContent='保存先フォルダを準備しています…';
+    const distinct = Array.from(new Set(pending.map(s=>s.drivePath)));
+    let folderMap;
+    try{ folderMap = await buildFolders(distinct, rootId, getToken, refresh); }
+    catch(err){ progressTxt.textContent='保存先フォルダの作成に失敗しました。もう一度お試しください。'; $('send').disabled=false; return; }
 
-    const updateProgress = ()=>{
-      const total = already + done;
-      barFill.style.width = Math.round(total/files.length*100)+'%';
-      progressTxt.textContent = `送っています… ${total}/${files.length}枚`;
-    };
-
-    // 受付準備（保存先 園名/クラス/行事 ＋ 一時鍵）
-    progressTxt.textContent = '受付の準備をしています…';
-    let token, folderId;
-    try{
-      const prep = await prepare(path);
-      token = prep.token; folderId = prep.folderId;
-    }catch(err){
-      progressTxt.textContent = '準備に失敗しました（'+err.message+'）。電波のよい場所でもう一度お試しください。';
-      send.disabled=false; return;
-    }
-    const getToken = () => token;
-    const refresh  = async () => { const p = await prepare(path); token = p.token; };
-
-    // 直接Driveアップロード（保存先＝園名/クラス/行事。ファイル名は 元名_目印 のみ）
-    let idx = 0;
+    // アップロード（4枚ずつ並行）
+    let done=0; const failed=[]; const total=pending.length;
+    const upd=()=>{ barFill.style.width=Math.round(done/total*100)+'%'; progressTxt.textContent=`送っています… ${done}/${total}枚`; };
+    let idx=0;
     async function worker(){
-      while(idx < pending.length){
-        const f = pending[idx++];
-        const ok = await uploadOne(f, folderId, getToken, refresh);
-        if(ok){ uploadedSet[await hash6(f)] = true; done++; }
-        else   { failed.push(f); }
-        updateProgress();
+      while(idx<pending.length){
+        const s = pending[idx++];
+        const fid = folderMap[s.drivePath];
+        const ok = fid ? await uploadOne(s.file, fid, getToken, refresh) : false;
+        if(ok){ receivedSet.add(keyOf(s.drivePath, s.file)); done++; }
+        else failed.push(s);
+        upd();
       }
     }
-    await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
+    await Promise.all(Array.from({length:4}, ()=>worker()));
 
-    // 全数照合：失敗が1枚も無ければ完了。あれば残りを再送できるようにする。
-    if(failed.length === 0){
+    if(failed.length===0){
       $('done').classList.add('show');
     }else{
-      const total = already + done;
-      progressTxt.textContent =
-        `${total}/${files.length}枚 たしかに届きました。残り ${failed.length}枚 が未達です。`+
-        `「続きを送る」を押すと、未達の分だけ送り直します。`;
-      send.disabled=false;
-      send.textContent='続きを送る';
+      progressTxt.textContent = `${done}/${total}枚 たしかに届きました。残り ${failed.length}枚 が未達です。「続きを送る」で送り直せます。`;
+      $('send').disabled=false; $('send').textContent='続きを送る';
     }
   }
 
-  /** GASから保存先フォルダID（園名/クラス/行事）と一時鍵を取得 */
-  async function prepare(path){
-    const res = await fetch(
-      `${GAS_URL}?action=prepare&school=${encodeURIComponent(SCHOOL_CODE)}`+
-      `&pass=${encodeURIComponent(PASS)}`+
-      `&path=${encodeURIComponent(path||'')}&t=${Date.now()}`
-    );
+  async function prepare(){
+    const res = await fetch(`${GAS_URL}?action=prepare&school=${enc(SCHOOL_CODE)}&pass=${enc(PASS)}&t=${Date.now()}`);
     const d = await res.json();
-    if(!d || !d.ok || !d.token || !d.folderId){
-      throw new Error((d && d.error) || 'no token/folder');
-    }
+    if(!d || !d.ok || !d.token || !d.rootId) throw new Error((d&&d.error) || 'no token/root');
     return d;
   }
 
-  /**
-   * 1枚をDriveへアップロード。成功=trueを返す。
-   * ・最大3回まで再試行
-   * ・鍵切れ(401)のときは refresh() で鍵を取り直して続行
-   */
-  async function uploadOne(file, folderId, getToken, refresh){
-    const h = await hash6(file);
-    const saveName = makeSaveName(file.name, h);
-    let triedRefresh = false;
+  /** 保存先パスのフォルダを、園名フォルダの下に上から順に作る（既にあれば再利用） */
+  async function buildFolders(distinctPaths, rootId, getToken, refresh){
+    const cache = new Map();   // 累積パス -> folderId
+    const map = {};
+    distinctPaths.sort();
+    for(const dp of distinctPaths){
+      if(dp===''){ map['']=rootId; continue; }
+      const segs = dp.split('/');
+      let parent = rootId, acc='';
+      for(const seg of segs){
+        acc = acc ? acc+'/'+seg : seg;
+        let id = cache.get(acc);
+        if(!id){ id = await findOrCreateFolder(parent, seg, getToken, refresh); cache.set(acc, id); }
+        parent = id;
+      }
+      map[dp] = parent;
+    }
+    return map;
+  }
 
-    for(let attempt=0; attempt<3; attempt++){
+  async function findOrCreateFolder(parentId, name, getToken, refresh){
+    for(let attempt=0; attempt<2; attempt++){
+      const tok = getToken();
+      const q = `'${parentId}' in parents and name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+      const findUrl = 'https://www.googleapis.com/drive/v3/files?q=' + enc(q) + '&fields=files(id)&pageSize=1';
+      let r = await fetch(findUrl, { headers:{ Authorization:'Bearer '+tok } });
+      if(r.status===401 && attempt===0){ await refresh(); continue; }
+      if(r.ok){ const d = await r.json(); if(d.files && d.files.length) return d.files[0].id; }
+      let c = await fetch('https://www.googleapis.com/drive/v3/files?fields=id', {
+        method:'POST',
+        headers:{ Authorization:'Bearer '+tok, 'Content-Type':'application/json' },
+        body: JSON.stringify({ name, mimeType:'application/vnd.google-apps.folder', parents:[parentId] })
+      });
+      if(c.status===401 && attempt===0){ await refresh(); continue; }
+      if(c.ok){ const cd = await c.json(); return cd.id; }
+      throw new Error('folder:'+name);
+    }
+    throw new Error('folder:'+name);
+  }
+
+  /** 1枚を元の名前のままDriveへ。401は鍵を取り直して続行、最大3回再試行。 */
+  async function uploadOne(file, folderId, getToken, refresh){
+    let triedRefresh=false;
+    for(let a=0; a<3; a++){
       try{
-        const res = await driveUpload(file, saveName, folderId, getToken());
-        if(res.ok) return true;                      // 201/200 = 保存成功
-        if(res.status === 401 && !triedRefresh){     // 鍵切れ → 取り直し
-          triedRefresh = true;
-          await refresh();
-          continue;
-        }
-        // それ以外のエラーは少し待って再試行
+        const res = await driveUpload(file, file.name, folderId, getToken());
+        if(res.ok) return true;
+        if(res.status===401 && !triedRefresh){ triedRefresh=true; await refresh(); continue; }
       }catch(e){ /* 通信エラー：再試行 */ }
-      await sleep(800*(attempt+1));
+      await sleep(800*(a+1));
     }
     return false;
   }
 
-  /**
-   * Drive REST API へ multipart で直接アップロード（base64を使わず、写真の実体をそのまま送る）。
-   * メタ情報(ファイル名・保存先フォルダ)と画像本体を1リクエストで送る。
-   */
   function driveUpload(file, name, folderId, token){
     const boundary = '----hpcanvas' + Math.random().toString(16).slice(2);
     const meta = { name: name, parents: [folderId] };
@@ -579,53 +683,30 @@
       `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
       JSON.stringify(meta),
       `\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`,
-      file,                                  // ← 画像の実体（バイナリ）をそのまま
+      file,
       `\r\n--${boundary}--`
     ]);
-    return fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-      {
-        method:'POST',
-        headers:{
-          'Authorization':'Bearer '+token,
-          'Content-Type':'multipart/related; boundary='+boundary
-        },
-        body: body
-      }
-    );
-  }
-
-  /** 保存名：元名_ハッシュ6桁.拡張子（衝突回避＆受取済み判定の目印） */
-  function makeSaveName(name, h){
-    const short = (h||'').substring(0,6);
-    const dot = name.lastIndexOf('.');
-    const base = dot>0 ? name.substring(0,dot) : name;
-    const ext  = dot>0 ? name.substring(dot) : '';
-    return `${base}_${short}${ext}`;
-  }
-
-  /** フォルダ名に使えない記号を取り除く（クラス名・行事名の掃除用） */
-  function sanitizeName(s){
-    return (s||'')
-      .trim()
-      .replace(/[\\\/:*?"<>|]/g,'')   // / \ : * ? " < > | は使えないので除去
-      .replace(/\s+/g,' ')             // 連続した空白は1つにまとめる
-      .replace(/^\.+|\.+$/g,'')        // 先頭・末尾のドットを除去
-      .trim();
+    return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'multipart/related; boundary='+boundary },
+      body: body
+    });
   }
 
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  /** ファイル内容からSHA-256の先頭6桁（受取済み判定・保存名に使用） */
-  async function hash6(file){
-    if(fileHashes.has(file)) return fileHashes.get(file);
-    const buf = await file.arrayBuffer();
-    const digest = await crypto.subtle.digest('SHA-256', buf);
-    const hex = Array.from(new Uint8Array(digest))
-      .map(b=>b.toString(16).padStart(2,'0')).join('');
-    const h = hex.substring(0,6);
-    fileHashes.set(file, h);
-    return h;
+  // ---------- 続けて送る（合言葉・受取済み判定は保持） ----------
+  $('againBtn').addEventListener('click', resetForNext);
+  function resetForNext(){
+    $('done').classList.remove('show');
+    files = []; treeRoot = null;
+    previewUrls.forEach(u=>URL.revokeObjectURL(u)); previewUrls=[];
+    $('tree').innerHTML=''; $('preview').innerHTML=''; $('selcount').textContent='';
+    $('treewrap').classList.remove('show');
+    $('progress').classList.remove('show'); $('barFill').style.width='0%';
+    $('send').textContent='チェックした写真を送る'; $('send').disabled=true;
+    $('folderInput').value=''; $('fileInput').value='';
+    window.scrollTo({ top:0, behavior:'smooth' });
   }
 </script>
 </body>

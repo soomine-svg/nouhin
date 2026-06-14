@@ -101,8 +101,9 @@
   }
   .trow{display:flex; align-items:center; gap:8px; padding:7px 6px; border-radius:8px;}
   .trow:hover{background:#fbf6ec;}
-  .ttoggle{width:16px; flex:0 0 16px; text-align:center; color:var(--sub);
-    cursor:pointer; font-size:.78rem; user-select:none;}
+  .ttoggle{width:28px; height:30px; flex:0 0 28px; display:flex; align-items:center; justify-content:center;
+    color:var(--accent-deep); cursor:pointer; font-size:1.3rem; line-height:1; user-select:none; border-radius:8px;}
+  .ttoggle.has:hover{background:#f0e6d4;}
   .tcheck{width:18px; height:18px; flex:0 0 18px; accent-color:var(--accent); cursor:pointer;}
   .tname{flex:1; font-size:.9rem; color:var(--ink); cursor:pointer; word-break:break-all;}
   .tcount{font-size:.75rem; color:var(--sub); white-space:nowrap;}
@@ -251,11 +252,11 @@
     <div class="help">
       <p class="help-title">写真の送り方</p>
       <ol class="help-steps">
-        <li>「フォルダを選ぶ」で、写真がまとまっている<b>上のフォルダ</b>を1回クリックして選びます（開かずにそのままOKを押す）。</li>
-        <li>表示された一覧から、<b>送りたいフォルダにチェック</b>を入れます。親にチェックすると中身ぜんぶが選ばれます。</li>
+        <li>写真が入っているフォルダを選びます。</li>
+        <li>表示された一覧から、送りたいフォルダにチェックを入れます（複数のフォルダをまとめて送れます）。</li>
         <li>「チェックした写真を送る」を押します。</li>
       </ol>
-      <p class="help-note">園のフォルダの分け方そのままで保存されます。前に送った写真は自動で飛ばすので、何度送っても重複しません。続けて送るときは、完了画面の「続けて送る」で合言葉を入れ直さずに次へ進めます。</p>
+      <p class="help-note">フォルダは開かずに選ぶだけでOKです。前に送った写真は自動で飛ばすので、何度送っても重複しません。続けて送るときは、完了画面の「続けて送る」で合言葉を入れ直さずに次へ進めます。</p>
     </div>
   </div>
 
@@ -425,7 +426,7 @@
     row.style.paddingLeft = (4 + depth*18) + 'px';
 
     const hasChildren = n.children.size>0;
-    const tog = document.createElement('span'); tog.className='ttoggle'; tog.textContent = hasChildren ? '▸' : '';
+    const tog = document.createElement('span'); tog.className = 'ttoggle' + (hasChildren ? ' has' : ''); tog.textContent = hasChildren ? '▸' : '';
     const cb = document.createElement('input'); cb.type='checkbox'; cb.className='tcheck';
     const nm = document.createElement('span'); nm.className='tname'; nm.textContent = n.name;
     const ct = document.createElement('span'); ct.className='tcount'; ct.textContent = n.count + '枚';

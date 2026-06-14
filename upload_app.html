@@ -438,17 +438,20 @@
     n._cb = cb; n._childBox = childBox;
 
     if(hasChildren){
-      const toggle = ()=>{
+      const renderChildren = ()=>{
         if(!n._rendered){
           n.children.forEach(ch => childBox.appendChild(renderNode(ch, depth+1)));
           n._rendered = true;
         }
-        const open = childBox.style.display==='none';
+      };
+      const setOpen = (open)=>{
+        if(open) renderChildren();
         childBox.style.display = open ? 'block' : 'none';
         tog.textContent = open ? '▾' : '▸';
       };
-      tog.onclick = toggle;
-      nm.onclick = toggle;
+      tog.onclick = ()=> setOpen(childBox.style.display==='none');
+      nm.onclick  = ()=> setOpen(childBox.style.display==='none');
+      if(depth === 0) setOpen(true);   // 最初の1段階を開いておく（中のフォルダがすぐ見える）
     }
     cb.onchange = ()=>{ cascade(n, cb.checked ? 'all' : 'none'); afterCheck(); };
     applyCheckUI(n);

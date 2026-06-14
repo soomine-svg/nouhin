@@ -38,9 +38,9 @@
     font-weight:400; letter-spacing:.05em; margin-bottom:2px;
   }
   .card{
-    width:100%; max-width:560px; background:var(--card);
+    width:100%; max-width:800px; background:var(--card);
     border:1px solid var(--line); border-radius:22px;
-    padding:26px 24px; margin-top:18px;
+    padding:32px 38px; margin-top:18px;
     box-shadow:0 18px 40px -28px rgba(120,90,40,.5);
   }
   .status{
@@ -57,13 +57,13 @@
   .status .txt b{font-size:1.02rem;color:var(--ink);}
   .status .txt p{font-size:.8rem;color:var(--sub);}
 
-  .classlist{margin:-10px 0 22px;}
+  .classlist{margin:-10px 0 22px; max-height:340px; overflow:auto;}
   .clsrow{
-    display:flex; justify-content:space-between; align-items:center; gap:10px;
-    font-size:.82rem; padding:8px 14px; border:1px solid var(--line);
-    border-radius:10px; background:#fffefb; margin-top:6px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    font-size:.9rem; padding:11px 16px; border:1px solid var(--line);
+    border-radius:10px; background:#fffefb; margin-top:7px;
   }
-  .clsrow .clsname{font-weight:700;color:var(--ink);}
+  .clsrow .clsname{font-weight:700;color:var(--ink); word-break:break-all;}
   .clsrow .clsmeta{color:var(--sub); white-space:nowrap;}
 
   .drop{
@@ -96,36 +96,36 @@
   .treewrap h4{font-size:.92rem; color:var(--ink); font-weight:700; margin-bottom:4px;}
   .treewrap .hint{font-size:.78rem; color:var(--sub); margin-bottom:12px;}
   .tree{
-    border:1px solid var(--line); border-radius:14px; padding:6px;
-    max-height:340px; overflow:auto; background:#fffefb;
+    border:1px solid var(--line); border-radius:14px; padding:8px;
+    max-height:460px; overflow:auto; background:#fffefb;
   }
-  .trow{display:flex; align-items:center; gap:8px; padding:7px 6px; border-radius:8px;}
+  .trow{display:flex; align-items:center; gap:10px; padding:9px 8px; border-radius:8px;}
   .trow:hover{background:#fbf6ec;}
   .ttoggle{width:28px; height:30px; flex:0 0 28px; display:flex; align-items:center; justify-content:center;
     color:var(--accent-deep); cursor:pointer; font-size:1.3rem; line-height:1; user-select:none; border-radius:8px;}
   .ttoggle.has:hover{background:#f0e6d4;}
-  .tcheck{width:18px; height:18px; flex:0 0 18px; accent-color:var(--accent); cursor:pointer;}
-  .tname{flex:1; font-size:.9rem; color:var(--ink); cursor:pointer; word-break:break-all;}
-  .tcount{font-size:.75rem; color:var(--sub); white-space:nowrap;}
+  .tcheck{width:20px; height:20px; flex:0 0 20px; accent-color:var(--accent); cursor:pointer;}
+  .tname{flex:1; font-size:.98rem; color:var(--ink); cursor:pointer; word-break:break-all;}
+  .tcount{font-size:.82rem; color:var(--sub); white-space:nowrap;}
 
   .selcount{font-size:.9rem; color:var(--accent-deep); font-weight:700; margin-top:14px; min-height:1.3em;}
 
   .preview{margin-top:14px;}
-  .preview h4{font-size:.82rem; color:var(--sub); font-weight:500; margin-bottom:10px;}
-  .pvgroup{margin-bottom:14px;}
-  .pvhead{font-size:.82rem; color:var(--ink); font-weight:700; margin-bottom:6px; word-break:break-all;}
+  .preview h4{font-size:.88rem; color:var(--sub); font-weight:500; margin-bottom:10px;}
+  .pvgroup{margin-bottom:16px;}
+  .pvhead{font-size:.9rem; color:var(--ink); font-weight:700; margin-bottom:8px; word-break:break-all;}
   .pvhead .pc{color:var(--sub); font-weight:400;}
-  .thumb-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .thumb-row{display:flex; flex-wrap:wrap; gap:10px;}
   .thumb{
-    width:60px; height:60px; border-radius:10px; overflow:hidden;
+    width:78px; height:78px; border-radius:10px; overflow:hidden;
     border:1px solid var(--line); position:relative; background:#f1ece2;
     display:flex; align-items:center; justify-content:center;
-    font-size:.56rem; color:var(--sub); text-align:center; padding:3px;
+    font-size:.62rem; color:var(--sub); text-align:center; padding:3px;
   }
   .thumb img{width:100%; height:100%; object-fit:cover;}
-  .thumb .ic{font-size:1.3rem; line-height:1;}
+  .thumb .ic{font-size:1.6rem; line-height:1;}
   .thumb .nm{position:absolute; bottom:0; left:0; right:0; background:rgba(255,255,255,.82);
-    font-size:.5rem; padding:1px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    font-size:.54rem; padding:1px 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 
   .send{
     width:100%; margin-top:20px; padding:18px; border:none; border-radius:16px;
@@ -330,8 +330,9 @@
     classes.forEach(c => {
       const row = document.createElement('div');
       row.className = 'clsrow';
-      const meta = (c.lastDate ? c.lastDate + '分まで' : 'まだ') + '・' + (c.count || 0) + '枚';
-      row.innerHTML = `<span class="clsname">${escapeHtml(c.name)}</span>`
+      const label = String(c.name || '').split('/').join('・');
+      const meta = (c.lastDate ? c.lastDate + '送信分まで' : 'まだ') + '・' + (c.count || 0) + '枚';
+      row.innerHTML = `<span class="clsname">${escapeHtml(label)}</span>`
                     + `<span class="clsmeta">${escapeHtml(meta)}</span>`;
       box.appendChild(row);
     });

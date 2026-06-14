@@ -151,7 +151,7 @@
   .help-note{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:.78rem;line-height:1.8;}
   .footer{margin-top:34px;font-size:.72rem;color:#b3a991;letter-spacing:.06em;text-align:center;}
 
-  /* 合言葉ゲート */
+  /* パスワードゲート */
   .gate{
     width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);
     border-radius:22px;padding:30px 26px;margin-top:24px;text-align:center;
@@ -197,11 +197,11 @@
     <div class="tagline">今しか見られない瞬間を、未来へつなぐ宝物に</div>
   </div>
 
-  <!-- 合言葉ゲート -->
+  <!-- パスワードゲート -->
   <div class="gate" id="gate">
     <h3>写真データ受付ページ</h3>
-    <p id="gateSchool">合言葉を入力してください</p>
-    <input type="text" id="passInput" inputmode="numeric" placeholder="あいことば" autocomplete="off">
+    <p id="gateSchool">パスワードを入力してください</p>
+    <input type="text" id="passInput" placeholder="パスワード" autocomplete="off">
     <button id="gateBtn">ひらく</button>
     <div class="err" id="gateErr"></div>
   </div>
@@ -292,18 +292,18 @@
   const $ = id => document.getElementById(id);
   const enc = encodeURIComponent;
 
-  // ---------- 合言葉ゲート ----------
+  // ---------- パスワードゲート ----------
   $('gateBtn').addEventListener('click', openGate);
   $('passInput').addEventListener('keydown', e => { if(e.key==='Enter') openGate(); });
 
   async function openGate(){
     const pass = $('passInput').value.trim();
-    if(!pass){ $('gateErr').textContent='合言葉を入れてください'; return; }
+    if(!pass){ $('gateErr').textContent='パスワードを入れてください'; return; }
     $('gateErr').textContent='確認しています…';
     try{
       const res = await fetch(`${GAS_URL}?action=status&school=${enc(SCHOOL_CODE)}&pass=${enc(pass)}&t=${Date.now()}`);
       const d = await res.json();
-      if(!d.ok){ $('gateErr').textContent = d.error || '合言葉が違うようです'; return; }
+      if(!d.ok){ $('gateErr').textContent = d.error || 'パスワードが違うようです'; return; }
       PASS = pass;
       SCHOOL_NAME = d.schoolName || '';
       receivedSet = new Set(d.received || []);
@@ -700,7 +700,7 @@
 
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  // ---------- 続けて送る（合言葉・受取済み判定は保持） ----------
+  // ---------- 続けて送る（パスワード・受取済み判定は保持） ----------
   $('againBtn').addEventListener('click', resetForNext);
   function resetForNext(){
     $('done').classList.remove('show');

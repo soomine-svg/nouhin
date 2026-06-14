@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H.P.canvas｜写真データ受付システム 使い方ガイド</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@500;600&display=swap');
+
+  :root{
+    --bg:#f7f4ee; --ink:#3a352e; --sub:#8a8276;
+    --accent:#c08a4e; --accent-deep:#9a6a36;
+    --card:#fffdf9; --line:#e6ddcf; --ok:#6b8f6b; --soft:#fbf6ec;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Zen Maru Gothic',sans-serif;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(192,138,78,.08), transparent 42%),
+      radial-gradient(circle at 88% 96%, rgba(107,143,107,.06), transparent 40%),
+      var(--bg);
+    color:var(--ink); line-height:1.85;
+    display:flex; flex-direction:column; align-items:center; padding:30px 18px 60px;
+  }
+  .guide{
+    width:100%; max-width:780px; background:var(--card);
+    border:1px solid var(--line); border-radius:24px;
+    padding:44px 48px; box-shadow:0 20px 46px -30px rgba(120,90,40,.5);
+  }
+
+  .head{text-align:center; padding-bottom:26px; border-bottom:1px solid var(--line); margin-bottom:30px;}
+  .logo{font-family:'Shippori Mincho',serif; font-size:1.7rem; letter-spacing:.08em; color:var(--accent-deep);}
+  .gtitle{font-family:'Shippori Mincho',serif; font-size:1.5rem; margin-top:18px; letter-spacing:.04em;}
+  .gsub{font-size:.92rem; color:var(--sub); margin-top:8px;}
+
+  .lead{font-size:.98rem; margin-bottom:8px;}
+
+  .sec-h{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Shippori Mincho',serif; font-size:1.18rem; color:var(--accent-deep);
+    margin:34px 0 16px;
+  }
+  .sec-h::before{content:''; width:6px; height:22px; border-radius:3px; background:var(--accent); display:inline-block;}
+
+  /* はじめに 記入欄 */
+  .fill{border:2px dashed var(--accent); border-radius:16px; background:var(--soft); padding:22px 24px;}
+  .fill p{font-size:.92rem; color:var(--sub); margin-bottom:6px;}
+  .fill-row{display:flex; align-items:center; gap:14px; margin-top:14px;}
+  .fill-label{
+    flex:0 0 110px; font-weight:700; font-size:.95rem; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; text-align:center;
+  }
+  .fill-blank{flex:1; border-bottom:2px dotted #c9bda4; height:26px;}
+
+  /* ステップ */
+  .step{
+    display:flex; gap:24px; align-items:center;
+    border:1px solid var(--line); border-radius:18px; background:#fffefb;
+    padding:22px 26px; margin-top:18px;
+  }
+  .step .fig{flex:0 0 210px;}
+  .step .body{flex:1;}
+  .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%; background:var(--accent); color:#fff;
+    font-weight:700; font-size:1.05rem; margin-bottom:8px;
+  }
+  .st-title{font-size:1.12rem; font-weight:700; margin-bottom:6px;}
+  .st-text{font-size:.96rem;}
+  .st-note{font-size:.84rem; color:var(--sub); margin-top:8px;}
+
+  /* 図（実画面を模したパーツ） */
+  .fig-mock{
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    border:1px solid var(--line); border-radius:14px; background:var(--soft); padding:18px 14px;
+  }
+  .mock-folder{font-size:2.6rem; line-height:1;}
+  .mock-btn{
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep)); color:#fff;
+    border-radius:12px; padding:11px 16px; font-size:.9rem; font-weight:700; text-align:center;
+    box-shadow:0 8px 16px -10px rgba(154,106,54,.9); width:100%;
+  }
+  .done-badge{
+    width:56px; height:56px; border-radius:50%; background:rgba(107,143,107,.16);
+    display:flex; align-items:center; justify-content:center; font-size:1.7rem; color:var(--ok); font-weight:700;
+  }
+  .sparkles{font-size:1.1rem; color:var(--accent); letter-spacing:8px;}
+
+  .mini-tree{width:100%; border:1px solid var(--line); border-radius:12px; background:#fffefb; padding:8px;}
+  .mr{display:flex; align-items:center; gap:7px; padding:5px 4px; font-size:.86rem; color:var(--ink);}
+  .mr.i{padding-left:26px;}
+  .mr.off{color:var(--sub);}
+  .ar{width:12px; flex:0 0 12px; color:var(--accent-deep); font-size:.78rem; text-align:center;}
+  .cb{
+    width:16px; height:16px; flex:0 0 16px; border-radius:4px; border:1.6px solid #d8cbb3; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:.7rem; color:#fff;
+  }
+  .cb.on{background:var(--accent); border-color:var(--accent);}
+
+  /* 安心ポイント */
+  .care{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .care-item{
+    display:flex; gap:12px; align-items:flex-start;
+    border:1px solid var(--line); border-radius:14px; background:var(--soft); padding:16px 18px;
+  }
+  .care-item .ck{
+    flex:0 0 26px; width:26px; height:26px; border-radius:50%;
+    background:rgba(107,143,107,.16); color:var(--ok);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.95rem;
+  }
+  .care-item .ct{font-size:.92rem;}
+  .care-item .ct b{display:block; margin-bottom:2px; color:var(--ink);}
+  .care-item .ct span{color:var(--sub); font-size:.86rem;}
+
+  .help-box{border:1px solid var(--line); border-radius:16px; background:#fffefb; padding:22px 24px; font-size:.95rem;}
+  .help-box .contact{margin-top:12px; display:flex; align-items:center; gap:14px;}
+  .help-box .contact .fill-label{flex:0 0 80px;}
+  .contact-val{font-weight:700; color:var(--accent-deep); word-break:break-all;}
+  .forname{font-weight:700; color:var(--accent-deep); margin-top:12px; font-size:1.02rem;}
+  .fill-blank.filled{border-bottom:none; height:auto; padding:2px 0; font-weight:700; color:var(--accent-deep); word-break:break-all;}
+  .fill-blank a{color:var(--accent-deep); text-decoration:underline; word-break:break-all;}
+
+  .foot{
+    text-align:center; margin-top:36px; padding-top:22px; border-top:1px solid var(--line);
+    font-size:.78rem; color:#b3a991; letter-spacing:.05em;
+  }
+
+  @media print{
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body{ background:#fff; padding:0; }
+    .guide{ max-width:100%; border:none; border-radius:0; box-shadow:none; padding:0 6mm; }
+    .step,.care-item,.fill,.help-box,.head{ break-inside:avoid; }
+    .sec-h{ break-after:avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="guide">
+
+    <div class="head">
+      <div class="logo">H.P.canvas</div>
+      <div class="gtitle">写真データ受付システム　使い方ガイド</div>
+      <div class="gsub">USBの受け渡しも、Googleドライブへのログインも要りません</div>
+      <div class="forname" id="forName"></div>
+    </div>
+
+    <p class="lead">
+      園の写真データを、パソコンから H.P.canvas へ送るためのページです。<br>
+      <b>フォルダを選んで、チェックを入れて、ボタンを押す</b>——この3ステップだけで送れます。
+    </p>
+
+    <div class="sec-h">はじめに（園ごとにお渡しします）</div>
+    <div class="fill">
+      <p>このページから写真を送ります。下のURLとパスワードをご確認ください（空欄の場合はご記入のうえ、ページをブックマークしておくと便利です）。</p>
+      <div class="fill-row"><div class="fill-label">園専用URL</div><div class="fill-blank" id="fillUrl"></div></div>
+      <div class="fill-row"><div class="fill-label">パスワード</div><div class="fill-blank" id="fillPw"></div></div>
+    </div>
+
+    <div class="sec-h">写真の送り方（3ステップ）</div>
+
+    <div class="step">
+      <div class="fig">
+        <div class="fig-mock">
+          <div class="mock-folder">📁</div>
+          <div class="mock-btn">📁 フォルダを選ぶ</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="num">1</div>
+        <div class="st-title">フォルダを選ぶ</div>
+        <div class="st-text">「フォルダを選ぶ」を押して、写真が入っているフォルダを選びます。</div>
+        <div class="st-note">※ フォルダは<b>開かずに、選んでOKを押すだけ</b>でOKです。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="fig">
+        <div class="fig-mock" style="padding:14px 12px;">
+          <div class="mini-tree">
+            <div class="mr"><span class="ar">▾</span><span class="cb on">✓</span><span>📁 A組</span></div>
+            <div class="mr i"><span class="cb on">✓</span><span>📁 遠足</span></div>
+            <div class="mr i off"><span class="cb"></span><span>📁 運動会</span></div>
+            <div class="mr off"><span class="ar">▸</span><span class="cb"></span><span>📁 B組</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="num">2</div>
+        <div class="st-title">送りたいフォルダにチェック</div>
+        <div class="st-text">園のフォルダがそのまま一覧で出ます。送りたいフォルダにチェックを入れてください。</div>
+        <div class="st-note">いくつでも選べます。▸ を押すと中のフォルダが開きます。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="fig">
+        <div class="fig-mock">
+          <div class="sparkles">✦　✦</div>
+          <div class="done-badge">✓</div>
+          <div class="mock-btn">チェックした写真を送る</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="num">3</div>
+        <div class="st-title">「チェックした写真を送る」を押す</div>
+        <div class="st-text">あとはボタンを押すだけ。「ありがとうございました」と出れば完了です。</div>
+        <div class="st-note">送信中はそのままお待ちください（枚数が多いと少し時間がかかります）。</div>
+      </div>
+    </div>
+
+    <div class="sec-h">安心ポイント</div>
+    <div class="care">
+      <div class="care-item"><div class="ck">✓</div><div class="ct"><b>写真は消えません</b><span>フォルダが空に見えても、写真はパソコンに残っています。</span></div></div>
+      <div class="care-item"><div class="ck">✓</div><div class="ct"><b>重複しません</b><span>一度送った写真は自動でスキップされます。何度送っても大丈夫。</span></div></div>
+      <div class="care-item"><div class="ck">✓</div><div class="ct"><b>何度でも送れます</b><span>あとから増えた写真だけ、続けて送れます。</span></div></div>
+      <div class="care-item"><div class="ck">✓</div><div class="ct"><b>タブレットの写真もOK</b><span>iPadなどのHEIC形式もそのまま送れます。</span></div></div>
+    </div>
+
+    <div class="sec-h">困ったときは</div>
+    <div class="help-box">
+      うまくいかないとき、ご不明な点があるときは、H.P.canvas までお気軽にご連絡ください。
+      <div class="contact"><div class="fill-label">メール</div><div class="contact-val">info@happy-photograph.com</div></div>
+      <div class="contact"><div class="fill-label">電話</div><div class="contact-val">050-8886-8299</div></div>
+    </div>
+
+    <div class="foot">H.P.canvas株式会社　記憶の片隅に、そっと灯る写真を。</div>
+
+  </div>
+
+  <script>
+    (function(){
+      var p = new URLSearchParams(location.search);
+      var BASE = 'https://soomine-svg.github.io/nouhin/upload_app.html';
+      var code = p.get('school'), pw = p.get('pw'), name = p.get('name');
+      if(code){
+        var u = BASE + '?school=' + encodeURIComponent(code);
+        var el = document.getElementById('fillUrl');
+        if(el){ var a=document.createElement('a'); a.href=u; a.textContent=u; el.textContent=''; el.appendChild(a); el.classList.add('filled'); }
+      }
+      if(pw){ var e2=document.getElementById('fillPw'); if(e2){ e2.textContent=pw; e2.classList.add('filled'); } }
+      if(name){ var e3=document.getElementById('forName'); if(e3){ e3.textContent = name + ' さま 専用'; } }
+    })();
+  </script>
+</body>
+</html>

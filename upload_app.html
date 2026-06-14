@@ -93,7 +93,12 @@
   .bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;}
   .bar i{display:block;height:100%;width:0;background:var(--accent);transition:.3s;}
   .progress p{font-size:.8rem;color:var(--sub);margin-top:6px;text-align:center;}
-  .help{margin-top:18px;font-size:.78rem;color:var(--sub);text-align:center;line-height:1.9;}
+  .help{margin-top:20px;font-size:.82rem;color:var(--sub);line-height:1.85;}
+  .help-title{font-weight:700;color:var(--ink);margin:0 0 10px;text-align:center;font-size:.9rem;}
+  .help-steps{margin:0;padding-left:1.5em;}
+  .help-steps li{margin-bottom:8px;}
+  .help-steps b{color:var(--accent-deep);}
+  .help-note{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:.78rem;line-height:1.8;}
   .footer{margin-top:34px;font-size:.72rem;color:#b3a991;letter-spacing:.06em;text-align:center;}
 
   /* 合言葉入力ゲート */
@@ -125,9 +130,13 @@
   .done .mark{font-size:3.4rem;margin-bottom:16px;}
   .done h2{font-family:'Shippori Mincho',serif;font-size:1.4rem;margin-bottom:10px;}
   .done p{color:var(--sub);font-size:.92rem;}
+  .done .btns{margin-top:26px; display:flex; flex-direction:column; gap:12px; width:100%; max-width:280px;}
   .done button{
-    margin-top:26px;padding:12px 30px;border-radius:12px;border:1px solid var(--line);
-    background:#fff;color:var(--ink);font-family:inherit;font-size:.9rem;cursor:pointer;
+    padding:14px 30px;border-radius:12px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);font-family:inherit;font-size:.95rem;cursor:pointer;
+  }
+  .done button.again{
+    background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;
   }
   .memo{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);}
   .memo-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px;}
@@ -229,10 +238,13 @@
     <button class="send" id="send" disabled>この写真を送る</button>
 
     <div class="help">
-      パソコンで「フォルダごと選ぶ」→ <b>一番下の階層のフォルダ</b>（例：遠足）を選んでください。<br>
-      クラス名・行事名を入力。選んだフォルダ名と同じ欄は「フォルダ名と同じ」にチェックすれば入力不要です。<br>
-      （選んだフォルダ名がどちらにも当てはまらないときは、両方とも手で入力してください）<br>
-      何度でも送れます。前に送った写真は自動で飛ばされます。送信後はページを閉じてかまいません。
+      <p class="help-title">写真の送り方</p>
+      <ol class="help-steps">
+        <li>「フォルダごと選ぶ」で、<b>一番下の階層のフォルダ</b>（例：遠足）を選びます。</li>
+        <li>クラス名・行事名を入力します。選んだフォルダ名と同じ欄は「フォルダ名と同じ」にチェックすると入力を省けます。どちらにも当てはまらないときは、両方とも手で入力してください。</li>
+        <li>「この写真を送る」を押します。</li>
+      </ol>
+      <p class="help-note">何度でも送れます。前に送った写真は自動で飛ばされます。クラスごとに分けて送るときは、完了画面の「続けて送る」を押せば、合言葉を入れ直さずに次を送れます。</p>
     </div>
   </div>
 
@@ -242,7 +254,10 @@
     <div class="mark">✨</div>
     <h2>ありがとうございました</h2>
     <p id="doneMsg">写真をたしかに受け取りました。<br>大切にお預かりいたします。</p>
-    <button onclick="location.reload()">とじる</button>
+    <div class="btns">
+      <button type="button" class="again" id="againBtn">続けて送る（ログイン不要）</button>
+      <button type="button" onclick="location.reload()">終わる</button>
+    </div>
   </div>
 
 <script>
@@ -410,6 +425,28 @@
 
   // ---------- 送信（直接Driveアップロード） ----------
   send.addEventListener('click', upload);
+
+  // 「続けて送る」：合言葉・受取済み判定は保ったまま、選択だけリセット（再ログイン不要）
+  $('againBtn').addEventListener('click', resetForNext);
+  function resetForNext(){
+    $('done').classList.remove('show');
+    files = [];
+    selectedFolderName = '';
+    thumbs.innerHTML = '';
+    count.textContent = '';
+    klassInput.value = ''; eventInput.value = '';
+    klassSame.checked = false; eventSame.checked = false;
+    klassInput.disabled = false; eventInput.disabled = false;
+    $('dest').textContent = '';
+    $('memo').style.display = 'none';
+    selected.classList.remove('show');
+    $('progress').classList.remove('show');
+    $('barFill').style.width = '0%';
+    send.textContent = 'この写真を送る';
+    send.disabled = true;
+    fileInput.value = ''; $('folderInput').value = '';   // 同じフォルダを選び直せるように
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   async function upload(){
     if(!files.length) return;

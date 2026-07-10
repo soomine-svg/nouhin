@@ -7,178 +7,209 @@
 <title>写真データ受付システム 使い方ガイド ｜ H.P.canvas</title>
 <style>
   :root{
-    --ink:#1f3b5c;
-    --ink-soft:#4a6480;
-    --paper:#fbfaf7;
-    --line:#d8dfe6;
-    --accent:#c8a96a;
-    --text:#2b2b2b;
-    --muted:#6f7680;
+    --bg:#f7f4ee; --ink:#3a352e; --sub:#8a8276;
+    --accent:#c08a4e; --accent-deep:#9a6a36; --ok:#6b8f6b;
+    --card:#fffdf9; --line:#e6ddcf; --paper:#f7f4ee;
+    --shadow:0 18px 40px -28px rgba(120,90,40,.5);
   }
   *{box-sizing:border-box}
   body{
     margin:0;
-    background:var(--paper);
-    color:var(--text);
+    background:
+      radial-gradient(circle at 20% 6%, rgba(192,138,78,.07), transparent 42%),
+      radial-gradient(circle at 88% 96%, rgba(107,143,107,.06), transparent 40%),
+      var(--bg);
+    color:var(--ink);
     font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
-    line-height:1.85;
+    line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
-  .sheet{
-    max-width:720px;
-    margin:0 auto;
-    padding:32px 20px 56px;
-    position:relative;
-  }
+  .sheet{max-width:760px;margin:0 auto;padding:34px 20px 60px}
+  .mincho{font-family:"Shippori Mincho","Hiragino Mincho ProN","Noto Serif JP",serif}
 
-  /* 四隅のL字ブラケット（ブランドモチーフ） */
-  .sheet::before,.sheet::after{
-    content:"";position:absolute;width:26px;height:26px;
-    border:2px solid var(--ink);pointer-events:none;
-  }
-  .sheet::before{top:14px;left:6px;border-right:none;border-bottom:none}
-  .sheet::after{bottom:14px;right:6px;border-left:none;border-top:none}
-
-  header{
-    border-bottom:1px solid var(--line);
-    padding-bottom:18px;margin-bottom:26px;
-  }
+  /* ---------- ヘッダー ---------- */
+  header{text-align:center;margin-bottom:26px}
   .brand{
-    font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;
-    font-size:13px;letter-spacing:.22em;color:var(--ink);
-    margin:0 0 10px;
+    font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:1.5rem;letter-spacing:.1em;color:var(--accent-deep);margin:0 0 4px;
   }
+  .brand-sub{font-size:.8rem;color:var(--sub);letter-spacing:.05em;margin:0 0 22px}
   h1{
-    font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;
-    font-size:24px;line-height:1.5;color:var(--ink);
-    margin:0 0 8px;font-weight:600;
+    font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:1.55rem;line-height:1.5;color:var(--ink);margin:0;font-weight:600;
   }
-  .for-name{
-    font-size:14px;color:var(--ink-soft);margin:0;
-  }
+  .for-name{font-size:.95rem;color:var(--accent-deep);margin:10px 0 0;font-weight:700}
   .for-name:empty{display:none}
 
-  .lede{
-    font-size:15px;color:var(--ink-soft);
-    margin:0 0 30px;
+  /* ---------- ひとこと＋3つの安心チップ ---------- */
+  .lede{text-align:center;font-size:.98rem;color:var(--sub);margin:20px auto 18px;max-width:520px}
+  .chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:34px}
+  .chip{
+    display:flex;align-items:center;gap:7px;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:8px 15px;font-size:.85rem;color:var(--ink);
   }
+  .chip .ic{font-size:1rem}
 
-  /* 手順 */
-  .steps{list-style:none;margin:0 0 34px;padding:0;counter-reset:s}
-  .steps li{
-    counter-increment:s;
-    position:relative;
-    padding:0 0 22px 52px;
-    border-left:1px solid var(--line);
-    margin-left:15px;
+  /* ---------- 専用情報カード ---------- */
+  .infocard{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    border-top:4px solid var(--accent);padding:22px 22px 18px;margin:0 0 40px;
+    box-shadow:var(--shadow);
   }
-  .steps li:last-child{border-left-color:transparent;padding-bottom:4px}
-  .steps li::before{
-    content:counter(s);
-    position:absolute;left:-15px;top:0;
-    width:30px;height:30px;border-radius:50%;
-    background:var(--ink);color:#fff;
-    font-size:14px;font-weight:600;
-    display:flex;align-items:center;justify-content:center;
+  .infocard h2{
+    font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:1.02rem;color:var(--accent-deep);margin:0 0 4px;font-weight:600;letter-spacing:.04em;
   }
-  .steps h2{
-    font-size:16px;margin:2px 0 4px;color:var(--ink);font-weight:600;
-  }
-  .steps p{margin:0;font-size:14.5px;color:var(--text)}
-
-  /* 専用情報カード */
-  .card{
-    background:#fff;
-    border:1px solid var(--line);
-    border-top:3px solid var(--ink);
-    padding:22px 22px 18px;
-    margin:0 0 30px;
-  }
-  .card h2{
-    font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;
-    font-size:16px;color:var(--ink);margin:0 0 16px;font-weight:600;
-    letter-spacing:.06em;
-  }
-  .field{margin-bottom:16px}
+  .infocard .note{font-size:.8rem;color:var(--sub);margin:0 0 16px}
+  .field{margin-bottom:15px}
   .field:last-child{margin-bottom:0}
-  .field .label{
-    font-size:12px;letter-spacing:.14em;color:var(--muted);
-    display:block;margin-bottom:5px;
-  }
-  .value{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  }
+  .field .label{font-size:.72rem;letter-spacing:.12em;color:var(--sub);display:block;margin-bottom:6px}
+  .value{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .value .text{
-    font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;
-    font-size:15px;word-break:break-all;color:var(--text);
-    background:#f4f6f8;border:1px solid var(--line);
-    padding:8px 11px;flex:1 1 auto;min-width:0;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:.95rem;
+    word-break:break-all;color:var(--ink);background:#f4efe6;border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px;flex:1 1 auto;min-width:0;
   }
-  .value a.text{color:var(--ink);text-decoration:underline}
-  .value .text.empty{color:var(--muted);font-style:normal}
+  .value a.text{color:var(--accent-deep);text-decoration:underline}
+  .value .text.empty{color:var(--sub)}
   button.copy{
-    flex:0 0 auto;
-    font:inherit;font-size:13px;
-    border:1px solid var(--ink);background:#fff;color:var(--ink);
-    padding:8px 14px;cursor:pointer;transition:background .15s,color .15s;
+    flex:0 0 auto;font:inherit;font-size:.82rem;font-weight:700;
+    border:1px solid var(--accent);background:#fff;color:var(--accent-deep);
+    border-radius:10px;padding:9px 15px;cursor:pointer;transition:.15s;
   }
-  button.copy:hover{background:var(--ink);color:#fff}
-  button.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  button.copy.ok{background:var(--ink);color:#fff;border-color:var(--ink)}
+  button.copy:hover{background:var(--accent);color:#fff}
+  button.copy.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
 
-  /* 補足 */
-  .notes{
-    border-top:1px solid var(--line);
-    padding-top:22px;margin-bottom:30px;
+  /* ---------- 手順の流れ ---------- */
+  .flow-title{
+    text-align:center;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:1.15rem;color:var(--ink);margin:0 0 6px;font-weight:600;
   }
-  .notes h2{
-    font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;
-    font-size:16px;color:var(--ink);margin:0 0 12px;font-weight:600;
-  }
-  .notes dl{margin:0}
-  .notes dt{font-size:14.5px;font-weight:600;color:var(--ink);margin-top:14px}
-  .notes dt:first-child{margin-top:0}
-  .notes dd{margin:2px 0 0;font-size:14.5px;color:var(--text)}
+  .flow-lead{text-align:center;font-size:.85rem;color:var(--sub);margin:0 0 26px}
 
-  /* 連絡先 */
+  .step{position:relative;padding:0 0 8px 56px;margin-bottom:26px}
+  /* 縦のつなぎ線 */
+  .step::before{
+    content:"";position:absolute;left:19px;top:38px;bottom:-18px;width:2px;
+    background:linear-gradient(var(--line),var(--line));
+  }
+  .step:last-child::before{display:none}
+  .num{
+    position:absolute;left:0;top:0;width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#fff;
+    font-size:1.05rem;font-weight:700;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 16px -8px rgba(154,106,54,.8);z-index:1;
+  }
+  .step h3{font-size:1.05rem;color:var(--ink);margin:6px 0 3px;font-weight:700}
+  .step p{font-size:.9rem;color:var(--sub);margin:0 0 14px}
+  .step p b{color:var(--accent-deep)}
+
+  /* ---------- 画面の再現ミニ図 ---------- */
+  .mock{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:18px;box-shadow:0 10px 26px -22px rgba(120,90,40,.6);max-width:420px;
+  }
+  .m-cap{
+    display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--accent-deep);
+    font-weight:700;margin-top:10px;max-width:420px;
+  }
+  .m-cap .arw{font-size:1rem}
+
+  /* ゲート */
+  .m-title{font-family:"Shippori Mincho",serif;font-size:.95rem;text-align:center;margin-bottom:2px}
+  .m-sub{font-size:.72rem;color:var(--sub);text-align:center;margin-bottom:14px}
+  .m-input{
+    border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center;
+    letter-spacing:.3em;color:var(--ink);background:#fff;margin-bottom:10px;font-size:1rem;
+  }
+  .m-btn{
+    border-radius:11px;padding:12px;text-align:center;font-weight:700;font-size:.92rem;
+  }
+  .m-btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#fff}
+  .m-btn-ghost{background:#fff;border:1px solid var(--line);color:var(--accent-deep);font-size:.8rem;padding:10px}
+  .m-btn-send{
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#fff;
+    padding:15px;font-size:1rem;letter-spacing:.04em;
+    box-shadow:0 12px 22px -14px rgba(154,106,54,.85);border-radius:14px;text-align:center;font-weight:700;
+  }
+
+  /* ドロップ */
+  .m-drop{
+    border:2px dashed #d8cbb3;border-radius:14px;padding:20px;text-align:center;margin-bottom:10px;background:#fffefb;
+  }
+  .m-drop .di{font-size:1.9rem}
+  .m-drop .db{font-size:.92rem;font-weight:700;margin-top:2px}
+  .m-drop .ds{font-size:.72rem;color:var(--sub)}
+
+  /* ツリー */
+  .m-hint{font-size:.82rem;font-weight:700;margin-bottom:10px;color:var(--ink)}
+  .m-row{display:flex;align-items:center;gap:9px;padding:9px 8px;border:1px solid var(--line);border-radius:9px;background:#fffefb;margin-bottom:7px;font-size:.88rem}
+  .m-row.indent{margin-left:22px}
+  .m-tog{color:var(--accent-deep);font-size:.9rem;width:14px;text-align:center}
+  .m-check{
+    width:19px;height:19px;flex:0 0 19px;border-radius:5px;
+    background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:.78rem;font-weight:700;
+  }
+  .m-nm{flex:1;font-weight:700;color:var(--ink)}
+  .m-ct{font-size:.78rem;color:var(--sub);white-space:nowrap}
+  .m-sel{font-size:.84rem;color:var(--accent-deep);font-weight:700;margin-top:12px;text-align:center}
+
+  /* 進捗 */
+  .m-bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;margin-bottom:6px}
+  .m-bar i{display:block;height:100%;width:66%;background:var(--accent);border-radius:6px}
+  .m-prog{font-size:.76rem;color:var(--sub);text-align:center}
+
+  /* 完了 */
+  .mock-done{text-align:center;background:linear-gradient(180deg,#fbf6ec,#fffdf9)}
+  .m-mark{font-size:2.4rem;margin-bottom:6px}
+  .m-done-title{font-family:"Shippori Mincho",serif;font-size:1.15rem;margin-bottom:6px}
+  .m-done-p{font-size:.82rem;color:var(--sub)}
+
+  /* ---------- 安心の説明カード ---------- */
+  .assure-title{
+    text-align:center;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:1.1rem;color:var(--ink);margin:44px 0 20px;font-weight:600;
+  }
+  .assure{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:40px}
+  .acard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px}
+  .acard .ai{font-size:1.4rem;line-height:1}
+  .acard h4{font-size:.92rem;color:var(--ink);margin:8px 0 4px;font-weight:700}
+  .acard p{font-size:.82rem;color:var(--sub);margin:0}
+
+  /* ---------- 連絡先 ---------- */
   .contact{
-    background:#fff;border:1px solid var(--line);
-    padding:20px 22px;margin-bottom:34px;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:20px 22px;margin-bottom:30px;box-shadow:var(--shadow);
   }
-  .contact h2{
-    font-size:15px;color:var(--ink);margin:0 0 10px;font-weight:600;
-  }
-  .contact p{margin:0;font-size:14.5px}
-  .contact a{color:var(--ink)}
-  .contact .sub{color:var(--muted);font-size:13px;margin-top:8px}
+  .contact h2{font-size:.98rem;color:var(--accent-deep);margin:0 0 10px;font-weight:700}
+  .contact p{margin:0;font-size:.9rem;line-height:1.9}
+  .contact a{color:var(--accent-deep)}
+  .contact .sub{color:var(--sub);font-size:.82rem;margin-top:10px}
 
-  footer{
-    border-top:1px solid var(--line);
-    padding-top:18px;
-    text-align:center;
-  }
+  footer{border-top:1px solid var(--line);padding-top:20px;text-align:center}
   footer .tag{
-    font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;
-    font-size:13.5px;color:var(--ink-soft);letter-spacing:.06em;margin:0 0 6px;
+    font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+    font-size:.9rem;color:var(--sub);letter-spacing:.05em;margin:0 0 6px;
   }
-  footer .co{font-size:12px;color:var(--muted);margin:0}
+  footer .co{font-size:.74rem;color:#b3a991;margin:0}
 
   @media (max-width:560px){
-    h1{font-size:21px}
+    h1{font-size:1.3rem}
+    .assure{grid-template-columns:1fr}
     .value{flex-direction:column;align-items:stretch}
     button.copy{width:100%}
+    .step{padding-left:50px}
   }
-
   @media print{
     body{background:#fff}
-    .sheet{max-width:none;padding:14mm 12mm}
+    .sheet{max-width:none;padding:12mm 10mm}
     button.copy{display:none}
-    .card,.contact{border-color:#999;background:#fff}
-    .value .text{background:#fff;border-color:#999}
-    a{text-decoration:none;color:#000}
-    .steps li{page-break-inside:avoid}
+    .infocard,.contact,.mock,.acard{box-shadow:none}
+    .step{page-break-inside:avoid}
+    a{color:#000}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -186,32 +217,25 @@
 
   <header>
     <p class="brand">H.P.canvas</p>
-    <h1>写真データ受付システム<br>使い方ガイド</h1>
+    <p class="brand-sub">写真データ受付システム</p>
+    <h1>写真の送り方ガイド</h1>
     <p class="for-name" id="forName"></p>
   </header>
 
   <p class="lede">
-    園のパソコンから、写真をそのまま送っていただけます。USBの受け渡しは必要ありません。
-    アプリのインストールも、アカウントの登録もいりません。
+    園のパソコンから、写真をそのまま送っていただけます。<br>
+    むずかしい準備はいりません。
   </p>
+  <div class="chips">
+    <span class="chip"><span class="ic">🔌</span>USBの受け渡し不要</span>
+    <span class="chip"><span class="ic">📥</span>インストール不要</span>
+    <span class="chip"><span class="ic">🙋</span>登録・ログイン不要</span>
+  </div>
 
-  <ol class="steps">
-    <li>
-      <h2>園専用ページを開く</h2>
-      <p>下の「園専用URL」を開いてください。ブラウザ（Chrome・Edge・Safariなど）でそのまま開きます。</p>
-    </li>
-    <li>
-      <h2>パスワードを入力する</h2>
-      <p>下の「パスワード」を入力すると、写真を送る画面になります。</p>
-    </li>
-    <li>
-      <h2>写真を選んで送る</h2>
-      <p>「写真を選ぶ」から、送りたい写真をまとめて選択します。あとは送信ボタンを押すだけです。枚数が多くても大丈夫です。</p>
-    </li>
-  </ol>
-
-  <section class="card">
-    <h2>この園の専用情報</h2>
+  <!-- 専用情報 -->
+  <section class="infocard">
+    <h2>この園の専用URLとパスワード</h2>
+    <p class="note">この2つを使って写真を送ります。手順①・②で使います。</p>
 
     <div class="field">
       <span class="label">園専用URL</span>
@@ -231,23 +255,111 @@
     </div>
   </section>
 
-  <section class="notes">
-    <h2>知っておいていただきたいこと</h2>
-    <dl>
-      <dt>途中でやめても、続きから送れます</dt>
-      <dd>もう一度同じ写真を選び直していただければ、送信済みの写真は自動でとばして、まだ送っていない写真だけを送ります。</dd>
+  <!-- 手順 -->
+  <p class="flow-title">送る手順は、5つだけ</p>
+  <p class="flow-lead">実際の画面のイメージを、そのまま並べています。</p>
 
-      <dt>同じ写真を二度送っても、増えません</dt>
-      <dd>写真の中身で見分けているので、重複して保存されることはありません。安心して送り直してください。</dd>
+  <div class="flow">
 
-      <dt>写真は園ごと・月ごとに保存されます</dt>
-      <dd>受け取った写真は、園名と年月で自動的に仕分けられます。ファイル名を変える必要はありません。</dd>
+    <div class="step">
+      <div class="num">1</div>
+      <h3>園専用ページを開く</h3>
+      <p>上の<b>「園専用URL」</b>を開きます。Chrome・Edge・Safari など、いつものブラウザでそのまま開けます。</p>
+      <div class="mock">
+        <div class="m-btn m-btn-ghost" style="text-align:left;font-family:ui-monospace,Menlo,monospace;color:var(--sub)">🔗 soomine-svg.github.io/nouhin/…</div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>このURLをクリック、またはコピーして貼り付け</div>
+    </div>
 
-      <dt>URLとパスワードのお取り扱い</dt>
-      <dd>この2つがそろわないと写真の受け渡しはできません。園の外に出さないようにお願いいたします。</dd>
-    </dl>
-  </section>
+    <div class="step">
+      <div class="num">2</div>
+      <h3>パスワードを入れて「ひらく」</h3>
+      <p>上の<b>「パスワード」</b>を入力し、<b>ひらく</b>を押します。これで写真を送る画面になります。</p>
+      <div class="mock">
+        <div class="m-title">写真データ受付ページ</div>
+        <div class="m-sub">○○保育園 さま</div>
+        <div class="m-input">••••••</div>
+        <div class="m-btn m-btn-primary">ひらく</div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>①パスワードを入れて　②「ひらく」を押す</div>
+    </div>
 
+    <div class="step">
+      <div class="num">3</div>
+      <h3>写真の入ったフォルダを選ぶ</h3>
+      <p><b>「📁 フォルダを選ぶ」</b>を押して、写真がまとまっている<b>上のフォルダ</b>を選びます。フォルダは開かず、選ぶだけでOKです。</p>
+      <div class="mock">
+        <div class="m-drop">
+          <div class="di">📁</div>
+          <div class="db">フォルダを選んでください</div>
+          <div class="ds">写真がまとまっている上のフォルダを選びます</div>
+        </div>
+        <div class="m-btn m-btn-primary">📁 フォルダを選ぶ</div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>この大きなボタンを押す（1枚ずつ選ぶこともできます）</div>
+    </div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <h3>送るフォルダにチェックを入れる</h3>
+      <p>中身が一覧で出ます。<b>送りたいフォルダにチェック</b>を入れてください。複数まとめて送れます。</p>
+      <div class="mock">
+        <div class="m-hint">送るフォルダにチェックを入れてください</div>
+        <div class="m-row"><span class="m-tog">▾</span><span class="m-check">✓</span><span class="m-nm">2025年度</span><span class="m-ct">240枚</span></div>
+        <div class="m-row indent"><span class="m-tog">▸</span><span class="m-check">✓</span><span class="m-nm">ひまわり組</span><span class="m-ct">120枚</span></div>
+        <div class="m-row indent"><span class="m-tog">▸</span><span class="m-check">✓</span><span class="m-nm">もも組</span><span class="m-ct">120枚</span></div>
+        <div class="m-sel">送る写真：240枚</div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>四角にチェック（✓）が付いた分だけ送られます</div>
+    </div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <h3>「チェックした写真を送る」を押す</h3>
+      <p>あとはボタンを押すだけ。枚数が多くても大丈夫です。送り終わると<b>お礼の画面</b>が出ます。</p>
+      <div class="mock">
+        <div class="m-btn m-btn-send">チェックした写真を送る</div>
+        <div style="margin-top:14px">
+          <div class="m-bar"><i></i></div>
+          <div class="m-prog">送っています… 158/240枚</div>
+        </div>
+      </div>
+      <div class="mock mock-done" style="margin-top:14px">
+        <div class="m-mark">✨</div>
+        <div class="m-done-title">ありがとうございました</div>
+        <div class="m-done-p">写真をたしかに受け取りました。大切にお預かりいたします。</div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>この画面が出たら送信完了です</div>
+    </div>
+
+  </div>
+
+  <!-- 安心の説明 -->
+  <p class="assure-title">知っておいていただきたいこと</p>
+  <div class="assure">
+    <div class="acard">
+      <div class="ai">⏸️</div>
+      <h4>途中でやめても、続きから送れます</h4>
+      <p>もう一度同じ写真を選び直せば、送信済みは自動でとばし、まだの分だけを送ります。</p>
+    </div>
+    <div class="acard">
+      <div class="ai">🔁</div>
+      <h4>二度送っても、増えません</h4>
+      <p>写真の中身で見分けるので、重複して保存されません。安心して送り直してください。</p>
+    </div>
+    <div class="acard">
+      <div class="ai">🗂️</div>
+      <h4>園ごと・月ごとに自動で仕分け</h4>
+      <p>園名と年月で自動的に整理されます。ファイル名を変える必要はありません。</p>
+    </div>
+    <div class="acard">
+      <div class="ai">🔒</div>
+      <h4>URLとパスワードの取り扱い</h4>
+      <p>この2つがそろわないと写真は送れません。園の外には出さないようお願いします。</p>
+    </div>
+  </div>
+
+  <!-- 連絡先 -->
   <section class="contact">
     <h2>お困りのとき</h2>
     <p>

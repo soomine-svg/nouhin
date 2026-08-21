@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>フォトソート — 写真のお届け</title>
+<style>
+:root{
+  --orange:#f47b20; --orange-l:#ffe9d9; --orange-d:#d5640f;
+  --ink:#2f2a26; --sub:#7a716a; --line:#f0e4da; --ok:#1fa793; --warn:#e0453c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fffdfb;color:var(--ink);
+     font-family:"Hiragino Sans","Yu Gothic",system-ui,sans-serif;line-height:1.8}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:24px;margin:0 0 6px;color:var(--orange-d)}
+.lead{color:var(--sub);margin:0 0 28px;font-size:15px}
+.step{background:#fff;border:2px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:18px}
+.step[hidden]{display:none}
+.step.done{border-color:var(--orange-l);background:#fffaf6}
+.num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+     border-radius:50%;background:var(--orange);color:#fff;font-weight:700;margin-right:10px;font-size:15px}
+h2{font-size:18px;margin:0 0 12px;display:flex;align-items:center}
+p{margin:0 0 14px}
+.note{font-size:14px;color:var(--sub)}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:14px 26px;cursor:pointer;
+       background:var(--orange);color:#fff;box-shadow:0 2px 0 var(--orange-d)}
+button:hover{background:var(--orange-d);box-shadow:none;transform:translateY(2px)}
+button:disabled{background:#d8cfc8;box-shadow:none;cursor:default;transform:none}
+button.ghost{background:#fff;color:var(--orange-d);border:2px solid var(--orange);box-shadow:none}
+button.ghost:hover{background:var(--orange-l);transform:none}
+.choice{display:flex;gap:12px;flex-wrap:wrap}
+.chosen{background:var(--orange-l);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:10px}
+.bar{height:14px;background:var(--line);border-radius:99px;overflow:hidden;margin:14px 0 8px}
+.bar>i{display:block;height:100%;width:0;background:var(--orange);transition:width .2s}
+.alert{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:15px}
+.alert.warn{background:#fff2f1;border:2px solid var(--warn);color:#a3221b}
+.alert.ok{background:#e9f8f5;border:2px solid var(--ok);color:#0f6b5d}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:10px}
+th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+td.n{text-align:right;white-space:nowrap}
+code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
+.log{max-height:190px;overflow:auto;font-size:13px;color:var(--sub);
+     background:#faf6f2;border-radius:10px;padding:10px 14px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>フォトソート — 写真のお届け</h1>
+<p class="lead">お預かりした写真を、お子様ごとのフォルダに整理します。<br>
+<strong>写真は先生のパソコンから外に出ません。</strong>すべてこのパソコンの中で処理します。</p>
+
+<div id="nosupport" class="alert warn" hidden></div>
+
+<section class="step" id="s1">
+  <h2><span class="num">1</span>振り分け表をお選びください</h2>
+  <p>ハッピーフォトグラフからお送りした <code>振り分け表.json</code> を選んでください。</p>
+  <button id="pickTable">振り分け表を選ぶ</button>
+  <input type="file" id="tableInput" accept=".json,application/json" hidden>
+  <div id="tableInfo" class="chosen" hidden></div>
+</section>
+
+<section class="step" id="s2" hidden>
+  <h2><span class="num">2</span>元の写真フォルダは、このあとも残されますか？</h2>
+  <p class="note">残される場合は、お子様ごとのフォルダだけを作ります（容量が少なくて済みます）。<br>
+  削除される予定の場合は、どのお子様にも当てはまらなかった写真も「未分類」に入れます。</p>
+  <div class="choice">
+    <button class="ghost" data-keep="1">残す</button>
+    <button class="ghost" data-keep="0">削除する予定</button>
+  </div>
+  <div id="keepInfo" class="chosen" hidden></div>
+</section>
+
+<section class="step" id="s3" hidden>
+  <h2><span class="num">3</span>写真の入ったフォルダをお選びください</h2>
+  <p>お送りいただいた写真が入っている親フォルダを、<strong>1つだけ</strong>選んでください。<br>
+  中のフォルダはまとめて読み込みます。</p>
+  <p class="note" id="destNote"></p>
+  <button id="pickFolder">写真フォルダを選ぶ</button>
+  <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
+</section>
+
+<section class="step" id="s4" hidden>
+  <h2><span class="num">4</span>整理しています</h2>
+  <div class="bar"><i id="prog"></i></div>
+  <p id="progText" class="note">準備しています…</p>
+  <div class="log" id="log"></div>
+</section>
+
+<section class="step" id="s5" hidden>
+  <h2><span class="num">✓</span>できあがりました</h2>
+  <div id="result"></div>
+</section>
+
+</div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const state = { table:null, index:null, keep:null, mode:null, dir:null };
+
+/* ---------- 対応状況の判定 ---------- */
+const HAS_FSA = typeof window.showDirectoryPicker === "function";
+const HAS_CRYPTO = !!(window.crypto && window.crypto.subtle);
+if (!HAS_FSA) {
+  const el = $("#nosupport"); el.hidden = false;
+  el.innerHTML = "このブラウザでは、フォルダに直接書き込めません。<br>" +
+    "<strong>整理した写真はZIPファイルとしてダウンロードします。</strong>（2GBまで）<br>" +
+    "容量が大きい場合は、<strong>Microsoft Edge か Google Chrome</strong> で開いてください。";
+}
+state.mode = HAS_FSA ? "fsa" : "zip";
+$("#destNote").textContent = HAS_FSA
+  ? "整理したフォルダは、選んだフォルダの中に作ります。"
+  : "整理した写真はZIPファイルになります。ダウンロード後に展開してください。";
+
+/* ---------- 1. 振り分け表 ---------- */
+$("#pickTable").onclick = () => $("#tableInput").click();
+$("#tableInput").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  let t;
+  try { t = JSON.parse(await f.text()); } catch { alert("振り分け表を読めませんでした。お送りしたファイルをそのままお選びください。"); return; }
+  if (!t || !Array.isArray(t["写真"])) { alert("これは振り分け表ではないようです。"); return; }
+  state.table = t;
+  state.index = buildIndex(t);
+  const kids = new Set(); t["写真"].forEach(p => p.c.forEach(c => kids.add(c)));
+  $("#tableInfo").hidden = false;
+  $("#tableInfo").innerHTML = `<strong>${esc(t["園名"]||"")}</strong>　写真 ${t["写真"].length}枚 ／ お子様 ${kids.size}名　<span class="note">(${esc(t["作成日"]||"")})</span>`;
+  $("#s1").classList.add("done"); $("#s2").hidden = false;
+  $("#s2").scrollIntoView({behavior:"smooth", block:"center"});
+};
+
+function buildIndex(t){
+  const byKey = new Map(), byHash = new Map();
+  for (const p of t["写真"]) {
+    const k = p.n + "|" + p.s;
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(p);
+    byHash.set(p.h, p);
+  }
+  return { byKey, byHash };
+}
+
+/* ---------- 2. 元データを残すか ---------- */
+document.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => {
+  state.keep = b.dataset.keep === "1";
+  $("#keepInfo").hidden = false;
+  $("#keepInfo").innerHTML = state.keep
+    ? "「残す」を選ばれました。<strong>お子様ごとのフォルダだけ</strong>を作ります。"
+    : "「削除する予定」を選ばれました。<strong>未分類の写真も含めて、お預かりした全部</strong>を書き出します。";
+  $("#s2").classList.add("done"); $("#s3").hidden = false;
+  $("#s3").scrollIntoView({behavior:"smooth", block:"center"});
+});
+
+/* ---------- 3. 写真フォルダ ---------- */
+window.addEventListener("unhandledrejection", e => showError(e.reason));
+function showError(err){
+  $("#s4").hidden = false; $("#s5").hidden = false;
+  $("#progText").textContent = "止まりました";
+  $("#result").innerHTML = `<div class="alert warn"><strong>途中で止まってしまいました。</strong><br>` +
+    esc(String(err && err.message || err)) + `<br><br>` +
+    `お手数ですが、このページを開き直してもう一度お試しください。<br>` +
+    `フォルダを選んだあとに出る「編集を許可」は、必ず<strong>許可</strong>を押してください。<br>` +
+    `それでも直らないときは、ハッピーフォトグラフ（s.oomine@happyphotograph.com）までこの画面をお知らせください。</div>`;
+  $("#s5").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+$("#pickFolder").onclick = async () => {
+  if (state.mode === "fsa") {
+    let dir;
+    try { dir = await window.showDirectoryPicker({ mode:"readwrite" }); }
+    catch { return; }
+    state.dir = dir;
+    // 書き込みの許可を明示的に取る。ここを飛ばすと、書き出しの途中で
+    // NotAllowedError が出て画面が止まったように見える(2026-08-20 実機で発生)
+    let perm = "denied";
+    try {
+      perm = await dir.queryPermission({ mode:"readwrite" });
+      if (perm !== "granted") perm = await dir.requestPermission({ mode:"readwrite" });
+    } catch { perm = "denied"; }
+    if (perm !== "granted") {
+      state.mode = "zip";                       // 書き込めないならZIPで渡す
+      const el = $("#nosupport"); el.hidden = false;
+      el.innerHTML = "このフォルダに書き込む許可が下りませんでした。<br>" +
+        "<strong>整理した写真はZIPファイルとしてダウンロードします。</strong>（2GBまで）";
+    }
+    start(await collectFSA(dir));
+  } else {
+    $("#folderInput").click();
+  }
+};
+$("#folderInput").onchange = e => {
+  const files = Array.from(e.target.files).filter(isImage);
+  if (!files.length) { alert("写真が見つかりませんでした。"); return; }
+  start(files.map(f => ({ file:f, path:f.webkitRelativePath || f.name })));
+};
+
+const IMG_RE = /\.(jpe?g|png|heic|heif)$/i;
+const isImage = f => IMG_RE.test(f.name) && !f.name.startsWith(".");
+const OUT_PREFIX = "仕分け結果_";
+
+async function collectFSA(dir){
+  const out = [];
+  async function walk(d, prefix){
+    for await (const [name, h] of d.entries()) {
+      if (name.startsWith(".") || name.startsWith(OUT_PREFIX)) continue;
+      if (h.kind === "file") {
+        if (!IMG_RE.test(name)) continue;
+        out.push({ handle:h, path: prefix + name });
+      } else {
+        await walk(h, prefix + name + "/");
+      }
+    }
+  }
+  await walk(dir, "");
+  return out;
+}
+
+/* ---------- 4. 実行 ---------- */
+const logEl = $("#log");
+const log = m => { logEl.insertAdjacentHTML("beforeend", esc(m) + "<br>"); logEl.scrollTop = 1e9; };
+const setProg = (i, n, t) => { $("#prog").style.width = (n ? i/n*100 : 0) + "%"; $("#progText").textContent = t; };
+
+async function start(entries){
+  try { await run(entries); } catch (e) { showError(e); }
+}
+
+async function run(entries){
+  $("#s3").classList.add("done"); $("#s4").hidden = false;
+  $("#s4").scrollIntoView({behavior:"smooth", block:"center"});
+
+  const { byKey, byHash } = state.index;
+  const plan = [];              // {file, dests:[パス]}
+  const stat = { matched:0, byHash:0, notInTable:0, skipped:0, sameContent:0, bytes:0 };
+  let i = 0;
+
+  // --- 照合。同じ中身の写真は1枚にまとめる ---------------------------------
+  // 園のフォルダには、同じ写真がコピー・別名保存・バックアップで
+  // 何枚も入っていることがある。そのまま入れるとお子様のフォルダに
+  // 同じ写真が違う名前で並んでしまうので、中身の単位で1枚に絞る。
+  const hits = new Map();       // 振り分け表の1行 → 見つかったファイル[]
+  const orphans = new Map();    // 表に無い写真: 名前+サイズ → ファイル
+  for (const ent of entries) {
+    i++;
+    if (i % 20 === 0 || i === entries.length) setProg(i, entries.length, `照合中… ${i} / ${entries.length}枚`);
+    const file = ent.file || await ent.handle.getFile();
+    let rec = null;
+    const cands = byKey.get(file.name + "|" + file.size);
+    if (cands && cands.length === 1) rec = cands[0];
+    else if (HAS_CRYPTO) {                       // 改名・同名衝突は中身で照合しなおす
+      rec = byHash.get(await sha1(file)) || null;
+      if (rec) stat.byHash++;
+    }
+    if (rec) {
+      if (!hits.has(rec)) hits.set(rec, []);
+      hits.get(rec).push(file);
+    } else {
+      const k = file.name + "|" + file.size;
+      if (orphans.has(k)) stat.sameContent++; else orphans.set(k, file);
+    }
+  }
+  stat.matched = hits.size;
+
+  // --- 書き出す先を決める ---------------------------------------------------
+  const add = (file, dests) => { plan.push({ file, dests }); stat.bytes += file.size * dests.length; };
+  for (const [rec, files] of hits) {
+    if (files.length > 1) stat.sameContent += files.length - 1;
+    // お預かりしたときの名前を優先する。無ければ最初に見つかったもの
+    const file = files.find(f => f.name === rec.n) || files[0];
+    if (rec.c.length) add(file, rec.c.map(child => join(child, rec.d, file.name)));
+    else if (!state.keep) add(file, [join("未分類", rec.d, file.name)]);
+    else stat.skipped++;
+  }
+  for (const file of orphans.values()) {
+    stat.notInTable++;
+    if (!state.keep) add(file, [join("未分類", "表にない写真", file.name)]);
+  }
+
+  log(`照合できた写真: ${stat.matched}枚（うち${stat.byHash}枚は名前が変わっていたので中身で照合）`);
+  if (stat.sameContent) log(`同じ中身の写真が別の名前で ${stat.sameContent}枚ありました → 1枚にまとめます`);
+  if (stat.notInTable) log(`振り分け表に無い写真: ${stat.notInTable}枚`
+      + (state.keep ? "（元のフォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
+  if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（元のフォルダに残ります）`);
+
+  if (state.mode === "zip" && stat.bytes > 2 * 1024 ** 3) {
+    setProg(0, 1, "中止しました");
+    $("#s5").hidden = false;
+    $("#result").innerHTML = `<div class="alert warn">整理後の合計が <strong>${gb(stat.bytes)}</strong> あり、
+      このブラウザで作れるZIPの上限（2GB）を超えています。<br>
+      お手数ですが <strong>Microsoft Edge</strong> か <strong>Google Chrome</strong> でこのページを開き直してください。
+      その場合はZIPではなく、フォルダに直接書き出します。</div>`;
+    return;
+  }
+
+  if (state.mode === "fsa") await writeFSA(plan, stat);
+  else await writeZip(plan, stat);
+}
+
+async function writeFSA(plan, stat){
+  const outName = OUT_PREFIX + today();
+  const outDir = await state.dir.getDirectoryHandle(outName, { create:true });
+  const cache = new Map();
+  let done = 0, n = plan.reduce((a, p) => a + p.dests.length, 0);
+  for (const item of plan) {
+    for (const d of item.dests) {
+      const parts = d.split("/"); const name = parts.pop();
+      let dir = outDir, key = "";
+      for (const part of parts) {
+        key += "/" + part;
+        if (!cache.has(key)) cache.set(key, await dir.getDirectoryHandle(part, { create:true }));
+        dir = cache.get(key);
+      }
+      const fh = await dir.getFileHandle(name, { create:true });
+      const w = await fh.createWritable();
+      await w.write(item.file);
+      await w.close();
+      done++;
+      if (done % 10 === 0 || done === n) setProg(done, n, `書き出し中… ${done} / ${n}件`);
+    }
+  }
+  finish(stat, outName, null);
+}
+
+async function writeZip(plan, stat){
+  const files = [];
+  let done = 0, n = plan.reduce((a, p) => a + p.dests.length, 0);
+  for (const item of plan) {
+    const crc = await crc32(item.file);
+    for (const d of item.dests) {
+      files.push({ name:d, file:item.file, crc });
+      done++;
+      if (done % 10 === 0 || done === n) setProg(done, n, `まとめています… ${done} / ${n}件`);
+    }
+  }
+  const blob = buildZip(files);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = OUT_PREFIX + today() + ".zip"; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  finish(stat, null, a.download);
+}
+
+function finish(stat, folderName, zipName){
+  setProg(1, 1, "完了しました");
+  $("#s4").classList.add("done"); $("#s5").hidden = false;
+  const rows = [["振り分け表と照合できた写真", stat.matched + "枚"]];
+  if (stat.byHash) rows.push(["　うち、名前が変わっていたので中身で照合", stat.byHash + "枚"]);
+  if (stat.sameContent) rows.push(["同じ中身が別名で入っていたので、まとめた分", stat.sameContent + "枚"]);
+  if (stat.notInTable) rows.push(["振り分け表に無かった写真", stat.notInTable + "枚"]);
+  if (state.keep && stat.skipped) rows.push(["書き出さなかった写真（元のフォルダに残ります）", stat.skipped + "枚"]);
+  let html = "<table>" + rows.map(r => `<tr><th>${r[0]}</th><td class="n">${r[1]}</td></tr>`).join("") + "</table>";
+  html += folderName
+    ? `<div class="alert ok">選んでいただいたフォルダの中に <code>${esc(folderName)}</code> ができました。<br>お子様のお名前のフォルダをお開きください。</div>`
+    : `<div class="alert ok"><code>${esc(zipName)}</code> をダウンロードしました。<br>ファイルを右クリックして「すべて展開」してください。</div>`;
+  html += state.keep
+    ? `<div class="alert warn">「元の写真フォルダを残す」を選ばれています。<br>
+       <strong>どのお子様にも当てはまらなかった写真（${stat.skipped}枚）は書き出していません。</strong><br>
+       元のフォルダは削除しないでください。</div>`
+    : `<div class="alert ok">お預かりした写真は、未分類も含めて<strong>すべて書き出しました。</strong><br>
+       中身をご確認いただいたうえで、元のフォルダは削除していただいて差し支えありません。<br>
+       <span class="note">削除後は、このパソコンが唯一の保管先になります。</span></div>`;
+  $("#result").innerHTML = html;
+  $("#s5").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* ---------- 部品 ---------- */
+const BAD = /[\\/:*?"<>|]/g;
+const safe = s => (s || "").replace(BAD, "_").replace(/[. ]+$/, "") || "_";
+const join = (...parts) => parts.filter(Boolean).flatMap(p => String(p).split("/")).filter(Boolean).map(safe).join("/");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const gb = b => (b / 1024 ** 3).toFixed(1) + "GB";
+function today(){ const d = new Date(), p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+
+async function sha1(file){
+  const buf = await crypto.subtle.digest("SHA-1", await file.arrayBuffer());
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+const CRC_TABLE = (() => { const t = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) { let c = i;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c >>> 0; }
+  return t; })();
+async function crc32(file){
+  let c = 0xFFFFFFFF;
+  const rd = file.stream().getReader();
+  for (;;) { const { done, value } = await rd.read(); if (done) break;
+    for (let i = 0; i < value.length; i++) c = CRC_TABLE[(c ^ value[i]) & 0xFF] ^ (c >>> 8); }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function buildZip(files){
+  const enc = new TextEncoder(), parts = [], central = [];
+  let offset = 0;
+  const u16 = n => [n & 255, (n >>> 8) & 255];
+  const u32 = n => [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255];
+  for (const f of files) {
+    const nm = enc.encode(f.name), sz = f.file.size;
+    const local = new Uint8Array([...u32(0x04034b50), ...u16(20), ...u16(0x0800), ...u16(0),
+      ...u16(0), ...u16(0), ...u32(f.crc), ...u32(sz), ...u32(sz), ...u16(nm.length), ...u16(0)]);
+    parts.push(local, nm, f.file);
+    central.push(new Uint8Array([...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0),
+      ...u16(0), ...u16(0), ...u32(f.crc), ...u32(sz), ...u32(sz), ...u16(nm.length),
+      ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(offset)]), nm);
+    offset += local.length + nm.length + sz;
+  }
+  const cdStart = offset;
+  let cdSize = 0; for (const c of central) cdSize += c.length;
+  const end = new Uint8Array([...u32(0x06054b50), ...u16(0), ...u16(0),
+    ...u16(files.length), ...u16(files.length), ...u32(cdSize), ...u32(cdStart), ...u16(0)]);
+  return new Blob([...parts, ...central, end], { type:"application/zip" });
+}
+</script>
+</body>
+</html>

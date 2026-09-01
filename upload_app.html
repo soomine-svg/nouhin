@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H.P.canvas｜写真データ受付</title>
+<title>H.P.canvas｜フォトポスト（園写真受付システム）</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@500;600&display=swap');
 
@@ -202,13 +202,13 @@
     <h3>フォトポスト（園写真受付システム）</h3>
     <p id="gateSchool">パスワードを入力してください</p>
     <input type="text" id="passInput" placeholder="パスワード" autocomplete="off">
-    <button id="gateBtn">ひらく</button>
+    <button id="gateBtn">開く</button>
     <div class="err" id="gateErr"></div>
   </div>
 
   <!-- メイン（認証後に表示） -->
   <div class="school hidden" id="mainHead">
-    <small>写真データ受付ページ</small>
+    <small>フォトポスト（園写真受付システム）</small>
     <span id="schoolName">○○保育園</span> さま 専用
   </div>
 
@@ -257,7 +257,8 @@
         <li>「<span id="helpSendLabel">チェックした写真を送る</span>」を押します。</li>
       </ol>
       <p class="help-note">フォルダは開かずに選ぶだけでOKです。一度送ったものは自動でスキップされます（何度送っても重複しませんのでご安心ください）。</p>
-      <p class="help-note">行事予定表や文集の原稿などのPDFも、写真と同じように送れます。PDFはこちらで写真とは別の場所に整理されます。</p>
+      <p class="help-note">行事予定表や文集の原稿などのPDFも、写真と同じように送れます。PDFはこちらで写真とは別の場所に整理しますので、写真と一緒にお送りいただいて大丈夫です。</p>
+      <p class="help-note">PDFを何枚もお送りいただくときは、ファイル名を「01_表紙」「02_ちゅうりっぷ組」のような連番にしていただくと、順番どおりに並びます。</p>
     </div>
   </div>
 
@@ -266,7 +267,7 @@
   <div class="done" id="done">
     <div class="mark">✨</div>
     <h2>ありがとうございました</h2>
-    <p id="doneMsg">写真をたしかに受け取りました。<br>大切にお預かりいたします。</p>
+    <p id="doneMsg">写真を確かに受け取りました。<br>大切にお預かりいたします。</p>
     <div class="btns">
       <button type="button" class="again" id="againBtn">続けて送る（ログイン不要）</button>
       <button type="button" onclick="location.reload()">終わる</button>
@@ -286,6 +287,9 @@
   let SCHOOL_NAME = '';
   let receivedSet = new Set();   // 受取済みキー "位置/名前|サイズ"
   const PDF_DIR = 'PDF書類';   // PDFだけを入れる、園フォルダ直下の整理棚
+  const BIG_FILE_BYTES = 8 * 1024 * 1024;   // これを超えるものは分割して送る
+  const CHUNK_BYTES    = 8 * 1024 * 1024;   // 1回に送る大きさ（256KBの倍数であること）
+  const RESUME_STORE   = 'hpcanvas.nouhin.resume';   // 送信用URLの控え（続きから送るため）
 
   let files = [];                // 今回選ばれた画像ファイル
   let treeRoot = null;           // フォルダツリー
@@ -634,14 +638,26 @@
     try{ folderMap = await buildFolders(distinct, rootId, getToken, refresh); }
     catch(err){ progressTxt.textContent='保存先フォルダの作成に失敗しました。もう一度お試しください。'; $('send').disabled=false; return; }
 
-    // アップロード（4つずつ並行）
+    // アップロード
+    //   小さいもの … 今までどおり4つずつ並行
+    //   大きいもの … 1つずつ、中身を分割して送る（途中で切れてもその続きから／回線を食い合わせない）
     let done=0; const failed=[]; const total=pending.length;
     const UNIT = hasPdf(pending) ? '件' : '枚';
-    const upd=()=>{ barFill.style.width=Math.round(done/total*100)+'%'; progressTxt.textContent=`送っています… ${done}/${total}${UNIT}`; };
+    let bigNote = '';
+    const upd=()=>{
+      barFill.style.width=Math.round(done/total*100)+'%';
+      progressTxt.textContent = bigNote
+        ? `${bigNote}（${done}/${total}${UNIT} 完了）`
+        : `送っています… ${done}/${total}${UNIT}`;
+    };
+
+    const smalls = pending.filter(s => s.file.size <= BIG_FILE_BYTES);
+    const bigs   = pending.filter(s => s.file.size >  BIG_FILE_BYTES);
+
     let idx=0;
     async function worker(){
-      while(idx<pending.length){
-        const s = pending[idx++];
+      while(idx<smalls.length){
+        const s = smalls[idx++];
         const fid = folderMap[s.drivePath];
         const ok = fid ? await uploadOne(s.file, fid, getToken, refresh) : false;
         if(ok){ receivedSet.add(keyOf(s.drivePath, s.file)); done++; }
@@ -651,11 +667,26 @@
     }
     await Promise.all(Array.from({length:4}, ()=>worker()));
 
+    for(const s of bigs){
+      const fid = folderMap[s.drivePath];
+      const onProgress = (sent)=>{
+        const pct = Math.round(sent / s.file.size * 100);
+        bigNote = `${s.file.name} を送っています… ${pct}%`;
+        upd();
+      };
+      onProgress(0);
+      const ok = fid ? await uploadBig(s, fid, getToken, refresh, onProgress) : false;
+      bigNote = '';
+      if(ok){ receivedSet.add(keyOf(s.drivePath, s.file)); done++; }
+      else failed.push(s);
+      upd();
+    }
+
     if(failed.length===0){
-      $('doneMsg').innerHTML = (UNIT === '件' ? 'データ' : '写真') + 'をたしかに受け取りました。<br>大切にお預かりいたします。';
+      $('doneMsg').innerHTML = (UNIT === '件' ? 'データ' : '写真') + 'を確かに受け取りました。<br>大切にお預かりいたします。';
       $('done').classList.add('show');
     }else{
-      progressTxt.textContent = `${done}/${total}${UNIT} たしかに届きました。残り ${failed.length}${UNIT} が未達です。「続きを送る」で送り直せます。`;
+      progressTxt.textContent = `${done}/${total}${UNIT} 確かに届きました。残り ${failed.length}${UNIT} が未達です。「続きを送る」で送り直せます。`;
       $('send').disabled=false; $('send').textContent='続きを送る';
     }
   }
@@ -717,6 +748,103 @@
         if(res.status===401 && !triedRefresh){ triedRefresh=true; await refresh(); continue; }
       }catch(e){ /* 通信エラー：再試行 */ }
       await sleep(800*(a+1));
+    }
+    return false;
+  }
+
+  // ---------- 大きなファイルを分割して送る（resumable upload） ----------
+  // Driveは「途中まで届いた」状態をサーバ側で覚えていられる。送信用のURLを1本もらい、
+  // そこへ少しずつ送る。切れても「どこまで届いた?」と聞いて、その続きから送り直せる。
+  // 送信用URLはブラウザにも控えるので、ページを閉じて開き直しても続きからになる。
+
+  function sessionKey(drivePath, file){ return SCHOOL_CODE + '|' + keyOf(drivePath, file); }
+  function readStore(){
+    try{ return JSON.parse(localStorage.getItem(RESUME_STORE) || '{}'); }catch(e){ return {}; }
+  }
+  function writeStore(all){
+    try{ localStorage.setItem(RESUME_STORE, JSON.stringify(all)); }catch(e){}
+  }
+  function loadSession(k){
+    const v = readStore()[k];
+    // 送信用URLはおよそ1週間で失効する。古いものは使わない
+    if(v && v.uri && (Date.now() - v.at) < 6*24*60*60*1000) return v.uri;
+    return null;
+  }
+  function saveSession(k, uri){ const all=readStore(); all[k]={uri:uri, at:Date.now()}; writeStore(all); }
+  function clearSession(k){ const all=readStore(); delete all[k]; writeStore(all); }
+
+  /** 送信用URLを1本もらう。取れなければ null。 */
+  async function openResumable(file, name, folderId, token){
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id', {
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json; charset=UTF-8',
+        'X-Upload-Content-Type': file.type || 'application/octet-stream',
+        'X-Upload-Content-Length': String(file.size)
+      },
+      body: JSON.stringify({ name:name, parents:[folderId] })
+    });
+    if(!res.ok) return null;
+    return res.headers.get('Location') || res.headers.get('location');
+  }
+
+  /** 「どこまで届いた?」と聞く。戻り値＝次に送る位置／-1は送信済み／nullは聞けなかった。 */
+  async function askProgress(uri, size, token){
+    const res = await fetch(uri, {
+      method:'PUT',
+      headers:{ 'Authorization':'Bearer '+token, 'Content-Range':'bytes */'+size }
+    });
+    if(res.status===200 || res.status===201) return -1;
+    if(res.status===308){
+      const r = res.headers.get('Range') || res.headers.get('range');
+      if(!r) return 0;
+      const m = /bytes=0-(\d+)/.exec(r);
+      return m ? parseInt(m[1],10)+1 : 0;
+    }
+    return null;
+  }
+
+  /** 1つの大きなファイルを、分割して送り切る。 */
+  async function uploadBig(s, folderId, getToken, refresh, onProgress){
+    const file = s.file, key = sessionKey(s.drivePath, file);
+    let uri = loadSession(key);
+
+    for(let attempt=0; attempt<5; attempt++){
+      try{
+        let start = 0;
+        if(!uri){
+          uri = await openResumable(file, file.name, folderId, getToken());
+          if(!uri){ await refresh(); await sleep(1000*(attempt+1)); continue; }
+          saveSession(key, uri);
+        }else{
+          const p = await askProgress(uri, file.size, getToken());
+          if(p === -1){ clearSession(key); onProgress(file.size); return true; }
+          if(p === null){ uri = null; clearSession(key); continue; }   // 送信用URLが失効→取り直す
+          start = p;
+        }
+        onProgress(start);
+
+        let stalled = false;
+        while(start < file.size && !stalled){
+          const end = Math.min(start + CHUNK_BYTES, file.size);
+          const res = await fetch(uri, {
+            method:'PUT',
+            headers:{
+              'Authorization':'Bearer '+getToken(),
+              'Content-Range':'bytes '+start+'-'+(end-1)+'/'+file.size
+            },
+            body: file.slice(start, end)
+          });
+          if(res.status===200 || res.status===201){ clearSession(key); onProgress(file.size); return true; }
+          if(res.status===308){ start = end; onProgress(start); continue; }
+          if(res.status===401 || res.status===403){ await refresh(); stalled = true; break; }
+          if(res.status===404 || res.status===410){ uri = null; clearSession(key); stalled = true; break; }
+          stalled = true;   // その他のエラーは、外側で聞き直してから続きを送る
+        }
+        if(start >= file.size){ clearSession(key); onProgress(file.size); return true; }
+      }catch(e){ /* 通信が切れた：外側で「どこまで届いた?」から再開 */ }
+      await sleep(1200*(attempt+1));
     }
     return false;
   }

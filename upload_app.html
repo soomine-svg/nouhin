@@ -226,17 +226,17 @@
     <label class="drop" id="drop">
       <div class="ico">📁</div>
       <div class="big">フォルダを選んでください</div>
-      <div class="small">写真がまとまっている上のフォルダを選ぶと、中身を一覧で表示します</div>
+      <div class="small">写真がまとまっている上のフォルダを選ぶと、中身を一覧で表示します<br>行事予定表などのPDFも、そのまま一緒に送れます</div>
     </label>
     <input type="file" id="folderInput" webkitdirectory multiple>
-    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
+    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif,.pdf,application/pdf">
     <button type="button" class="folderBtn" id="folderBtn">📁 フォルダを選ぶ</button>
-    <button type="button" class="looseBtn" id="looseBtn">写真を1枚ずつ選ぶ場合はこちら</button>
+    <button type="button" class="looseBtn" id="looseBtn">写真・PDFを1つずつ選ぶ場合はこちら</button>
 
     <!-- フォルダのチェックツリー -->
     <div class="treewrap" id="treewrap">
       <h4>送るフォルダにチェックを入れてください</h4>
-      <p class="hint">▸ を押すと中が開きます。チェックを入れた分だけ送られます（一度送った画像は自動でスキップされます）。</p>
+      <p class="hint">▸ を押すと中が開きます。チェックを入れた分だけ送られます（一度送ったものは自動でスキップされます）。</p>
       <div class="tree" id="tree"></div>
       <div class="selcount" id="selcount"></div>
       <div class="preview" id="preview"></div>
@@ -256,7 +256,8 @@
         <li>表示された一覧から、送りたいフォルダにチェックを入れます（複数のフォルダをまとめて送れます）。</li>
         <li>「チェックした写真を送る」を押します。</li>
       </ol>
-      <p class="help-note">フォルダは開かずに選ぶだけでOKです。一度送った画像は自動でスキップされます（何度送っても重複しませんのでご安心ください）。</p>
+      <p class="help-note">フォルダは開かずに選ぶだけでOKです。一度送ったものは自動でスキップされます（何度送っても重複しませんのでご安心ください）。</p>
+      <p class="help-note">行事予定表や文集の原稿などのPDFも、写真と同じように送れます。PDFはこちらで写真とは別の場所に整理されます。</p>
     </div>
   </div>
 
@@ -284,6 +285,8 @@
   let PASS = '';
   let SCHOOL_NAME = '';
   let receivedSet = new Set();   // 受取済みキー "位置/名前|サイズ"
+  const PDF_DIR = 'PDF書類';   // PDFだけを入れる、園フォルダ直下の整理棚
+
   let files = [];                // 今回選ばれた画像ファイル
   let treeRoot = null;           // フォルダツリー
   let stripContainer = false;    // 一番上の入れ物フォルダ名を保存先から外すか
@@ -331,7 +334,8 @@
       const row = document.createElement('div');
       row.className = 'clsrow';
       const label = String(c.name || '').split('/').join('・');
-      const meta = (c.lastDate ? c.lastDate + '送信分まで' : 'まだ') + '・' + (c.count || 0) + '枚';
+      const isDocs = String(c.name || '').indexOf(PDF_DIR) === 0;
+      const meta = (c.lastDate ? c.lastDate + '送信分まで' : 'まだ') + '・' + (c.count || 0) + (isDocs ? '件' : '枚');
       row.innerHTML = `<span class="clsname">${escapeHtml(label)}</span>`
                     + `<span class="clsmeta">${escapeHtml(meta)}</span>`;
       box.appendChild(row);
@@ -355,14 +359,29 @@
   function isImageFile(f){
     return (f.type||'').startsWith('image/') || /\.(jpe?g|png|heic|heif|gif|webp|bmp|tiff?)$/i.test(f.name);
   }
+  function isPdf(f){
+    return /pdf/i.test(f.type||'') || /\.pdf$/i.test(f.name);
+  }
+  /** 受け付ける対象＝写真 または PDF。これ以外は今までどおり対象外。 */
+  function isAcceptedFile(f){ return isImageFile(f) || isPdf(f); }
+
+  /** 写真とPDFの数を「12枚・PDF 3件」のように書き分ける */
+  function countLabel(list){
+    const pdf = list.reduce((n,x)=> n + (isPdf(x.file || x) ? 1 : 0), 0);
+    const img = list.length - pdf;
+    if(pdf === 0) return img + '枚';
+    if(img === 0) return 'PDF ' + pdf + '件';
+    return img + '枚・PDF ' + pdf + '件';
+  }
+  function hasPdf(list){ return list.some(x => isPdf(x.file || x)); }
   function isHeic(f){
     return /heic|heif/i.test(f.type||'') || /\.(heic|heif)$/i.test(f.name);
   }
 
   function handle(list){
-    files = Array.from(list).filter(isImageFile);
+    files = Array.from(list).filter(isAcceptedFile);
     if(!files.length){
-      $('selcount').textContent = '画像ファイルが見つかりませんでした。';
+      $('selcount').textContent = '写真もPDFも見つかりませんでした。';
       $('treewrap').classList.add('show');
       $('tree').innerHTML = ''; $('preview').innerHTML = '';
       $('send').disabled = true;
@@ -373,7 +392,7 @@
     treeRoot = buildTree(files);
     renderTree(treeRoot);
     $('treewrap').classList.add('show');
-    $('send').textContent = 'チェックした写真を送る';
+    $('send').textContent = hasPdf(files) ? 'チェックしたデータを送る' : 'チェックした写真を送る';
     updatePreview();
   }
 
@@ -381,9 +400,13 @@
     const segs = (file.webkitRelativePath || file.name).split('/').filter(Boolean);
     return segs.slice(0, -1); // ファイル名を除いたフォルダ部分
   }
-  /** その写真の保存先パス（園名フォルダの下）。入れ物を外す設定なら先頭を落とす。 */
+  /** その写真の保存先パス（園名フォルダの下）。入れ物を外す設定なら先頭を落とす。
+   *  PDFだけは「PDF書類」の下へ入れる（園が作ったフォルダ構造はその下にそのまま再現する）。
+   *  → 写真のフォルダにPDFが混ざらないので、仕分けにも制作にも影響しない。 */
   function drivePathOf(file){
     let segs = folderSegsOf(file);
+    // PDFは入れ物フォルダを外さない（「PDF書類/文集」のようにまとまって、埋もれない）
+    if(isPdf(file)) return [PDF_DIR].concat(segs).join('/');
     if(stripContainer) segs = segs.slice(1);
     return segs.join('/');
   }
@@ -412,8 +435,18 @@
     countFiles(root);
     return root;
   }
-  function node(name){ return { name, children:new Map(), files:[], count:0, checkState:'none', _cb:null, _childBox:null, _rendered:false }; }
-  function countFiles(n){ let c=n.files.length; n.children.forEach(ch=>c+=countFiles(ch)); n.count=c; return c; }
+  function node(name){ return { name, children:new Map(), files:[], count:0, pdfCount:0, checkState:'none', _cb:null, _childBox:null, _rendered:false }; }
+  function countFiles(n){
+    let c=n.files.length;
+    let p=n.files.reduce((a,f)=>a+(isPdf(f)?1:0),0);
+    n.children.forEach(ch=>{ c+=countFiles(ch); p+=ch.pdfCount; });
+    n.count=c; n.pdfCount=p; return c;
+  }
+  function nodeLabel(n){
+    if(n.pdfCount === 0) return n.count + '枚';
+    if(n.pdfCount === n.count) return 'PDF ' + n.pdfCount + '件';
+    return (n.count - n.pdfCount) + '枚・PDF ' + n.pdfCount + '件';
+  }
 
   // ---------- ツリー描画（子は開いた時に描く） ----------
   function renderTree(root){
@@ -430,7 +463,7 @@
     const tog = document.createElement('span'); tog.className = 'ttoggle' + (hasChildren ? ' has' : ''); tog.textContent = hasChildren ? '▸' : '';
     const cb = document.createElement('input'); cb.type='checkbox'; cb.className='tcheck';
     const nm = document.createElement('span'); nm.className='tname'; nm.textContent = n.name;
-    const ct = document.createElement('span'); ct.className='tcount'; ct.textContent = n.count + '枚';
+    const ct = document.createElement('span'); ct.className='tcount'; ct.textContent = nodeLabel(n);
     row.append(tog, cb, nm, ct);
     wrap.appendChild(row);
 
@@ -506,17 +539,18 @@
     previewUrls.forEach(u=>URL.revokeObjectURL(u)); previewUrls = [];
     const sel = collectSelected();
 
-    let pending = 0;
-    sel.forEach(s=>{ if(!receivedSet.has(keyOf(s.drivePath, s.file))) pending++; });
-    const done = sel.length - pending;
+    const pendingList = sel.filter(s=>!receivedSet.has(keyOf(s.drivePath, s.file)));
+    const doneList    = sel.filter(s=> receivedSet.has(keyOf(s.drivePath, s.file)));
+    const pending = pendingList.length;
 
     if(sel.length===0){
       $('selcount').textContent = '';
       $('send').disabled = true;
     }else{
-      $('selcount').textContent = done>0
-        ? `送る写真：${pending}枚（ほかに ${done}枚 は受取済みで自動スキップ）`
-        : `送る写真：${pending}枚`;
+      const head = hasPdf(sel) ? '送るデータ：' : '送る写真：';
+      $('selcount').textContent = doneList.length>0
+        ? `${head}${countLabel(pendingList)}（ほかに ${countLabel(doneList)} は受取済みで自動スキップ）`
+        : `${head}${countLabel(pendingList)}`;
       $('send').disabled = pending===0;
     }
 
@@ -526,7 +560,9 @@
 
     const pv = $('preview'); pv.innerHTML = '';
     if(groups.size===0) return;
-    const head = document.createElement('h4'); head.textContent='送る写真（確認）'; pv.appendChild(head);
+    const head = document.createElement('h4');
+    head.textContent = hasPdf(sel) ? '送るデータ（確認）' : '送る写真（確認）';
+    pv.appendChild(head);
 
     let shown=0;
     groups.forEach((arr, path)=>{
@@ -534,7 +570,7 @@
       shown++;
       const g = document.createElement('div'); g.className='pvgroup';
       const h = document.createElement('div'); h.className='pvhead';
-      h.innerHTML = `📁 ${escapeHtml(path || '（フォルダなし）')} <span class="pc">${arr.length}枚</span>`;
+      h.innerHTML = `📁 ${escapeHtml(path || '（フォルダなし）')} <span class="pc">${countLabel(arr)}</span>`;
       g.appendChild(h);
       const row = document.createElement('div'); row.className='thumb-row';
       arr.slice(0,4).forEach(f=>row.appendChild(makeThumb(f)));
@@ -554,9 +590,9 @@
 
   function makeThumb(f){
     const t = document.createElement('div'); t.className='thumb';
-    if(isHeic(f) || !(f.type||'').startsWith('image/')){
-      // ブラウザで表示できない形式（HEIC等）はアイコン＋名前で「在る」ことを示す
-      const ic=document.createElement('div'); ic.className='ic'; ic.textContent='🖼️';
+    if(isHeic(f) || isPdf(f) || !(f.type||'').startsWith('image/')){
+      // ブラウザで表示できない形式（HEIC・PDF等）はアイコン＋名前で「在る」ことを示す
+      const ic=document.createElement('div'); ic.className='ic'; ic.textContent = isPdf(f) ? '📄' : '🖼️';
       const nm=document.createElement('div'); nm.className='nm'; nm.textContent=f.name;
       t.append(ic, nm);
     }else{
@@ -596,9 +632,10 @@
     try{ folderMap = await buildFolders(distinct, rootId, getToken, refresh); }
     catch(err){ progressTxt.textContent='保存先フォルダの作成に失敗しました。もう一度お試しください。'; $('send').disabled=false; return; }
 
-    // アップロード（4枚ずつ並行）
+    // アップロード（4つずつ並行）
     let done=0; const failed=[]; const total=pending.length;
-    const upd=()=>{ barFill.style.width=Math.round(done/total*100)+'%'; progressTxt.textContent=`送っています… ${done}/${total}枚`; };
+    const UNIT = hasPdf(pending) ? '件' : '枚';
+    const upd=()=>{ barFill.style.width=Math.round(done/total*100)+'%'; progressTxt.textContent=`送っています… ${done}/${total}${UNIT}`; };
     let idx=0;
     async function worker(){
       while(idx<pending.length){
@@ -613,9 +650,10 @@
     await Promise.all(Array.from({length:4}, ()=>worker()));
 
     if(failed.length===0){
+      $('doneMsg').innerHTML = (UNIT === '件' ? 'データ' : '写真') + 'をたしかに受け取りました。<br>大切にお預かりいたします。';
       $('done').classList.add('show');
     }else{
-      progressTxt.textContent = `${done}/${total}枚 たしかに届きました。残り ${failed.length}枚 が未達です。「続きを送る」で送り直せます。`;
+      progressTxt.textContent = `${done}/${total}${UNIT} たしかに届きました。残り ${failed.length}${UNIT} が未達です。「続きを送る」で送り直せます。`;
       $('send').disabled=false; $('send').textContent='続きを送る';
     }
   }

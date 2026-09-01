@@ -199,7 +199,7 @@
 
   <!-- パスワードゲート -->
   <div class="gate" id="gate">
-    <h3>写真データ受付ページ</h3>
+    <h3>フォトポスト（園写真受付システム）</h3>
     <p id="gateSchool">パスワードを入力してください</p>
     <input type="text" id="passInput" placeholder="パスワード" autocomplete="off">
     <button id="gateBtn">ひらく</button>
@@ -254,7 +254,7 @@
       <ol class="help-steps">
         <li>写真が入っているフォルダを選びます。</li>
         <li>表示された一覧から、送りたいフォルダにチェックを入れます（複数のフォルダをまとめて送れます）。</li>
-        <li>「チェックした写真を送る」を押します。</li>
+        <li>「<span id="helpSendLabel">チェックした写真を送る</span>」を押します。</li>
       </ol>
       <p class="help-note">フォルダは開かずに選ぶだけでOKです。一度送ったものは自動でスキップされます（何度送っても重複しませんのでご安心ください）。</p>
       <p class="help-note">行事予定表や文集の原稿などのPDFも、写真と同じように送れます。PDFはこちらで写真とは別の場所に整理されます。</p>
@@ -392,7 +392,9 @@
     treeRoot = buildTree(files);
     renderTree(treeRoot);
     $('treewrap').classList.add('show');
-    $('send').textContent = hasPdf(files) ? 'チェックしたデータを送る' : 'チェックした写真を送る';
+    const sendLabel = hasPdf(files) ? 'チェックしたデータを送る' : 'チェックした写真を送る';
+    $('send').textContent = sendLabel;
+    $('helpSendLabel').textContent = sendLabel;   // 説明の3番もボタンと同じ文字にそろえる
     updatePreview();
   }
 
@@ -747,7 +749,7 @@
     $('tree').innerHTML=''; $('preview').innerHTML=''; $('selcount').textContent='';
     $('treewrap').classList.remove('show');
     $('progress').classList.remove('show'); $('barFill').style.width='0%';
-    $('send').textContent='チェックした写真を送る'; $('send').disabled=true;
+    $('send').textContent='チェックした写真を送る'; $('helpSendLabel').textContent='チェックした写真を送る'; $('send').disabled=true;
     $('folderInput').value=''; $('fileInput').value='';
     window.scrollTo({ top:0, behavior:'smooth' });
   }

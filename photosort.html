@@ -69,17 +69,18 @@ code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
 
 <section class="step" id="s2" hidden>
   <h2><span class="num">2</span>できあがるフォルダに、どの写真まで入れますか？</h2>
-  <p class="note">どちらを選んでも、元の写真は変わりません。迷われたときは「すべて」をお選びください。</p>
+  <p class="note"><strong>このツールは、写真を消したり書き換えたりすることはありません。</strong>いまパソコンに入っている写真はそのまま残り、新しいフォルダにコピーを作ります。<br>
+  どちらを選んでも安全です。迷われたときは「すべて」をお選びください。</p>
   <div class="choice">
     <button class="pick" data-keep="0">
       <span class="pick-t">お預かりした写真を、すべて入れる</span>
-      <span class="pick-s">おすすめ。元の写真をあとで片づけたい方、迷われた方</span>
-      <span class="pick-d">お子様ごとのフォルダに加えて、どのお子様にも当てはまらなかった写真も「未分類」フォルダに入れます。写真が抜ける心配がありません。</span>
+      <span class="pick-s">おすすめ。いまの写真フォルダを、あとで整理するかもしれない方・迷われた方</span>
+      <span class="pick-d">お子様ごとのフォルダに加えて、どのお子様にも当てはまらなかった写真も「未分類」フォルダにコピーします。新しいフォルダだけで、お預かりした写真が全部そろいます。</span>
     </button>
     <button class="pick" data-keep="1">
       <span class="pick-t">お子様ごとのフォルダだけを作る</span>
-      <span class="pick-s">元の写真を、今の場所にそのまま置いておく方</span>
-      <span class="pick-d">どのお子様にも当てはまらなかった写真は作りません（元のフォルダにあるためです）。容量が少なくて済みます。</span>
+      <span class="pick-s">いまの写真フォルダを、これからもそのまま使い続ける方</span>
+      <span class="pick-d">どのお子様にも当てはまらなかった写真はコピーしません（いまの写真フォルダに、そのまま残ります）。容量が少なくて済みます。</span>
     </button>
   </div>
   <div id="keepInfo" class="chosen" hidden></div>
@@ -87,7 +88,7 @@ code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
 
 <section class="step" id="s3" hidden>
   <h2><span class="num">3</span>写真の入ったフォルダをお選びください</h2>
-  <p class="hint">お預かりした<strong>元の写真をそのまま</strong>お使いください。明るさの調整などをされた写真は、別の名前で保存していただくと確実です。<br>
+  <p class="hint"><strong>フォトポストでお送りいただいたときのままの写真</strong>をお使いください。明るさの調整などをされた写真は、別の名前で保存していただくと確実です。<br>
   （明るさ・縮小・保存し直し程度なら、見た目で照合し直します。切り抜きや回転をした写真は「未分類」に入ります）</p>
   <p>お送りいただいた写真が入っている親フォルダを、<strong>1つだけ</strong>選んでください。<br>
   中のフォルダはまとめて読み込みます。</p>
@@ -156,12 +157,12 @@ function buildIndex(t){
   return { byKey, byHash, withPhash };
 }
 
-/* ---------- 2. 元データを残すか ---------- */
+/* ---------- 2. 未分類もコピーするか ---------- */
 document.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => {
   state.keep = b.dataset.keep === "1";
   $("#keepInfo").hidden = false;
   $("#keepInfo").innerHTML = state.keep
-    ? "「お子様ごとのフォルダだけを作る」を選ばれました。当てはまらなかった写真は元のフォルダに残ります。"
+    ? "「お子様ごとのフォルダだけを作る」を選ばれました。当てはまらなかった写真は、いまの写真フォルダにそのまま残ります。"
     : "「すべて入れる」を選ばれました。<strong>未分類の写真も含めて、お預かりした全部</strong>を書き出します。";
   $("#s2").classList.add("done"); $("#s3").hidden = false;
   $("#s3").scrollIntoView({behavior:"smooth", block:"center"});
@@ -320,8 +321,8 @@ async function run(entries){
       + (stat.byLook ? `、${stat.byLook}枚は明るさ調整などで変わっていたので見た目で照合` : "") + "）");
   if (stat.sameContent) log(`同じ中身の写真が別の名前で ${stat.sameContent}枚ありました → 1枚にまとめます`);
   if (stat.notInTable) log(`振り分け表に無い写真: ${stat.notInTable}枚`
-      + (state.keep ? "（元のフォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
-  if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（元のフォルダに残ります）`);
+      + (state.keep ? "（いまの写真フォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
+  if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（いまの写真フォルダに残ります）`);
   if (stat.missing.length) log(`振り分け表にあるのに、選ばれたフォルダの中に見つからなかった写真: ${stat.missing.length}枚（できあがりの画面に一覧を出します）`);
 
   if (state.mode === "zip" && stat.bytes > 2 * 1024 ** 3) {
@@ -390,7 +391,7 @@ function finish(stat, folderName, zipName){
   if (stat.byLook) rows.push(["　うち、明るさ調整などで変わっていたので見た目で照合", stat.byLook + "枚"]);
   if (stat.sameContent) rows.push(["同じ中身が別名で入っていたので、まとめた分", stat.sameContent + "枚"]);
   if (stat.notInTable) rows.push(["振り分け表に無かった写真", stat.notInTable + "枚"]);
-  if (state.keep && stat.skipped) rows.push(["書き出さなかった写真（元のフォルダに残ります）", stat.skipped + "枚"]);
+  if (state.keep && stat.skipped) rows.push(["コピーしなかった写真（いまの写真フォルダに残ります）", stat.skipped + "枚"]);
   if (stat.missing && stat.missing.length) rows.push(["振り分け表にあるのに見つからなかった写真", stat.missing.length + "枚（下に一覧）"]);
   let html = "<table>" + rows.map(r => `<tr><th>${r[0]}</th><td class="n">${r[1]}</td></tr>`).join("") + "</table>";
   html += folderName
@@ -398,18 +399,18 @@ function finish(stat, folderName, zipName){
     : `<div class="alert ok"><code>${esc(zipName)}</code> をダウンロードしました。<br>ファイルを右クリックして「すべて展開」してください。</div>`;
   html += state.keep
     ? `<div class="alert warn">「お子様ごとのフォルダだけを作る」を選ばれています。<br>
-       <strong>どのお子様にも当てはまらなかった写真（${stat.skipped}枚）は書き出していません。</strong><br>
-       元のフォルダは削除しないでください。</div>`
-    : `<div class="alert ok">お預かりした写真は、未分類も含めて<strong>すべて書き出しました。</strong><br>
-       中身をご確認いただいたうえで、元のフォルダは削除していただいて差し支えありません。<br>
-       <span class="note">削除後は、このパソコンが唯一の保管先になります。</span></div>`;
+       <strong>どのお子様にも当てはまらなかった写真（${stat.skipped}枚）はコピーしていません。</strong><br>
+       いまの写真フォルダは、これまでどおりそのまま残してください。</div>`
+    : `<div class="alert ok">お預かりした写真は、未分類も含めて<strong>すべて新しいフォルダにコピーしました。</strong><br>
+       中身をご確認いただいたうえで、いまの写真フォルダは整理していただいて差し支えありません。<br>
+       <span class="note">整理されたあとは、新しいフォルダがこのパソコンでの唯一の保管先になります。</span></div>`;
 
   if (stat.missing && stat.missing.length) {
     const byEv = new Map();
     for (const r of stat.missing) { const d = r.d || "（行事なし）"; if (!byEv.has(d)) byEv.set(d, []); byEv.get(d).push(r.n); }
     let html = `<details class="alert warn" style="margin-top:10px"><summary><strong>振り分け表にあるのに見つからなかった写真 ${stat.missing.length}枚</strong>（クリックで一覧）</summary>
       <p style="margin:8px 0">お預かりしたときの写真が、選ばれたフォルダの中に無いか、切り抜き・回転などで中身が変わっています。<br>
-      元の写真が別の場所（スマホ・LINE・別のパソコン）にある場合は、そのフォルダも一緒に選んでもう一度お試しください。</p>`;
+      お送りいただいたときの写真が別の場所（スマホ・LINE・別のパソコン）にある場合は、そのフォルダも一緒に選んでもう一度お試しください。</p>`;
     for (const [d, names] of byEv) html += `<p style="margin:6px 0"><strong>${esc(d)}</strong>（${names.length}枚）<br><span style="font-size:12px;color:#555">${names.slice(0, 200).map(esc).join("、")}${names.length > 200 ? "、…" : ""}</span></p>`;
     html += `</details>`;
     $("#result").insertAdjacentHTML("beforeend", html);

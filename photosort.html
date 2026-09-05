@@ -29,6 +29,8 @@ button:hover{background:var(--orange-d);box-shadow:none;transform:translateY(2px
 button:disabled{background:#d8cfc8;box-shadow:none;cursor:default;transform:none}
 button.ghost{background:#fff;color:var(--orange-d);border:2px solid var(--orange);box-shadow:none}
 button.ghost:hover{background:var(--orange-l);transform:none}
+.fig{margin:6px 0 14px;overflow-x:auto}
+.fig svg{width:100%;max-width:640px;display:block}
 .choice{display:flex;gap:12px;flex-wrap:wrap}
 button.pick{flex:1 1 260px;text-align:left;background:#fff;color:var(--ink);border:2px solid var(--orange);box-shadow:none;
             padding:16px 18px;display:flex;flex-direction:column;gap:6px;font-weight:400}
@@ -54,8 +56,9 @@ code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
 <div class="wrap">
 
 <h1>フォトソート — 写真のお届け</h1>
-<p class="lead">お預かりした写真を、お子様ごとのフォルダに整理します。<br>
-<strong>写真は先生のパソコンから外に出ません。</strong>すべてこのパソコンの中で処理します。</p>
+<p class="lead">フォトポストでお送りいただいた写真は、園のパソコンに入ったままです。<br>
+このページは、その写真を園のパソコンの中でコピーして、<strong>お子様ごとのフォルダを新しく作ります。</strong><br>
+写真を消したり、書き換えたりすることはありません。写真がパソコンの外に出ることもありません。</p>
 
 <div id="nosupport" class="alert warn" hidden></div>
 
@@ -68,30 +71,55 @@ code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
 </section>
 
 <section class="step" id="s2" hidden>
-  <h2><span class="num">2</span>できあがるフォルダに、どの写真まで入れますか？</h2>
-  <p class="note"><strong>このツールは、写真を消したり書き換えたりすることはありません。</strong>いまパソコンに入っている写真はそのまま残り、新しいフォルダにコピーを作ります。<br>
-  どちらを選んでも安全です。迷われたときは「すべて」をお選びください。</p>
+  <h2><span class="num">2</span>どのお子様にも当てはまらなかった写真も、新しいフォルダに入れますか？</h2>
+  <p>写真の中には、先生だけが写った写真や風景など、<strong>どのお子様のフォルダにも入らない写真</strong>があります。<br>
+  その写真も、新しいフォルダの中に「未分類」として入れておくかどうかを選んでください。</p>
+  <div class="fig" aria-label="園のパソコンにある写真フォルダはそのまま残り、新しいフォルダにコピーが作られる図">
+<svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" font-family="inherit" font-size="14">
+  <!-- 左：園のパソコンにある写真フォルダ -->
+  <rect x="12" y="24" width="220" height="182" rx="14" fill="#faf6f2" stroke="#d8cfc8" stroke-width="2"/>
+  <text x="122" y="52" text-anchor="middle" font-weight="700" fill="#2f2a26">園のパソコンにある</text>
+  <text x="122" y="72" text-anchor="middle" font-weight="700" fill="#2f2a26">写真フォルダ</text>
+  <rect x="34" y="90" width="176" height="26" rx="6" fill="#fff" stroke="#d8cfc8"/><text x="46" y="108" fill="#2f2a26">📷 運動会の写真…</text>
+  <rect x="34" y="122" width="176" height="26" rx="6" fill="#fff" stroke="#d8cfc8"/><text x="46" y="140" fill="#2f2a26">📷 発表会の写真…</text>
+  <rect x="34" y="154" width="176" height="26" rx="6" fill="#fff" stroke="#d8cfc8"/><text x="46" y="172" fill="#2f2a26">📷 先生だけ・風景…</text>
+  <text x="122" y="200" text-anchor="middle" font-size="12" fill="#7a716a">そのまま残ります（消しません）</text>
+  <!-- 矢印 -->
+  <line x1="240" y1="115" x2="300" y2="115" stroke="#e8823a" stroke-width="4" stroke-linecap="round"/>
+  <polygon points="300,105 318,115 300,125" fill="#e8823a"/>
+  <text x="279" y="98" text-anchor="middle" font-weight="700" fill="#b85f1e">コピー</text>
+  <!-- 右：新しいフォルダ -->
+  <rect x="326" y="24" width="302" height="182" rx="14" fill="#fff" stroke="#e8823a" stroke-width="2"/>
+  <text x="477" y="52" text-anchor="middle" font-weight="700" fill="#b85f1e">新しくできるフォルダ</text>
+  <rect x="348" y="66" width="258" height="26" rx="6" fill="#fff5ec" stroke="#e8823a"/><text x="360" y="84" fill="#2f2a26">👧 お子様のお名前（行事ごと）</text>
+  <rect x="348" y="98" width="258" height="26" rx="6" fill="#fff5ec" stroke="#e8823a"/><text x="360" y="116" fill="#2f2a26">👦 お子様のお名前（行事ごと）</text>
+  <text x="477" y="140" text-anchor="middle" fill="#7a716a">…お子様の人数ぶん</text>
+  <rect x="348" y="152" width="258" height="30" rx="6" fill="#fff" stroke="#e8823a" stroke-dasharray="6 4"/><text x="360" y="172" fill="#2f2a26">📁 未分類（先生だけ・風景）</text>
+  <text x="477" y="200" text-anchor="middle" font-size="12" fill="#b85f1e" font-weight="700">「はい」を選ぶと、この未分類も入ります</text>
+</svg>
+  </div>
+  <p class="note">どちらを選んでも、園のパソコンにある写真はそのまま残ります。迷われたときは「はい」をお選びください。</p>
   <div class="choice">
     <button class="pick" data-keep="0">
-      <span class="pick-t">お預かりした写真を、すべて入れる</span>
-      <span class="pick-s">おすすめ。いまの写真フォルダを、あとで整理するかもしれない方・迷われた方</span>
-      <span class="pick-d">お子様ごとのフォルダに加えて、どのお子様にも当てはまらなかった写真も「未分類」フォルダにコピーします。新しいフォルダだけで、お預かりした写真が全部そろいます。</span>
+      <span class="pick-t">はい。すべての写真を新しいフォルダに入れる</span>
+      <span class="pick-s">おすすめ。園のパソコンにある写真フォルダを、あとで整理するかもしれない方・迷われた方</span>
+      <span class="pick-d">お子様ごとのフォルダに加えて、当てはまらなかった写真も「未分類」フォルダにコピーします。新しいフォルダだけで、お送りいただいた写真が全部そろいます。</span>
     </button>
     <button class="pick" data-keep="1">
-      <span class="pick-t">お子様ごとのフォルダだけを作る</span>
-      <span class="pick-s">いまの写真フォルダを、これからもそのまま使い続ける方</span>
-      <span class="pick-d">どのお子様にも当てはまらなかった写真はコピーしません（いまの写真フォルダに、そのまま残ります）。容量が少なくて済みます。</span>
+      <span class="pick-t">いいえ。お子様ごとのフォルダだけを作る</span>
+      <span class="pick-s">園のパソコンにある写真フォルダを、これからもそのまま使い続ける方</span>
+      <span class="pick-d">当てはまらなかった写真はコピーしません。園のパソコンにある写真フォルダの中に、そのまま残っています。容量が少なくて済みます。</span>
     </button>
   </div>
   <div id="keepInfo" class="chosen" hidden></div>
 </section>
 
 <section class="step" id="s3" hidden>
-  <h2><span class="num">3</span>写真の入ったフォルダをお選びください</h2>
-  <p class="hint"><strong>フォトポストでお送りいただいたときのままの写真</strong>をお使いください。明るさの調整などをされた写真は、別の名前で保存していただくと確実です。<br>
-  （明るさ・縮小・保存し直し程度なら、見た目で照合し直します。切り抜きや回転をした写真は「未分類」に入ります）</p>
-  <p>お送りいただいた写真が入っている親フォルダを、<strong>1つだけ</strong>選んでください。<br>
-  中のフォルダはまとめて読み込みます。</p>
+  <h2><span class="num">3</span>フォトポストでお送りいただいた写真が入っているフォルダをお選びください</h2>
+  <p>振り分け表と写真を突き合わせるために、写真がどこにあるかを教えてください。<br>
+  園のパソコンの中で、フォトポストでお送りいただいた写真が入っているフォルダを、<strong>いちばん上のフォルダ1つだけ</strong>選びます。中にあるフォルダは、まとめて読み込みます。</p>
+  <p class="hint">写真は、フォトポストでお送りいただいたときのままの状態が確実です。<br>
+  明るさの調整・縮小・保存し直しをした写真でも、たいていはそのまま見つけられます。切り抜きや回転をした写真は見つけられないため、「未分類」に入ります。</p>
   <p class="note" id="destNote"></p>
   <button id="pickFolder">写真フォルダを選ぶ</button>
   <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
@@ -162,8 +190,8 @@ document.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => {
   state.keep = b.dataset.keep === "1";
   $("#keepInfo").hidden = false;
   $("#keepInfo").innerHTML = state.keep
-    ? "「お子様ごとのフォルダだけを作る」を選ばれました。当てはまらなかった写真は、いまの写真フォルダにそのまま残ります。"
-    : "「すべて入れる」を選ばれました。<strong>未分類の写真も含めて、お預かりした全部</strong>を書き出します。";
+    ? "「いいえ」を選ばれました。お子様ごとのフォルダだけを作ります。当てはまらなかった写真は、園のパソコンにある写真フォルダにそのまま残ります。"
+    : "「はい」を選ばれました。<strong>未分類の写真も含めて、お送りいただいた写真をすべて</strong>新しいフォルダにコピーします。";
   $("#s2").classList.add("done"); $("#s3").hidden = false;
   $("#s3").scrollIntoView({behavior:"smooth", block:"center"});
 });
@@ -321,8 +349,8 @@ async function run(entries){
       + (stat.byLook ? `、${stat.byLook}枚は明るさ調整などで変わっていたので見た目で照合` : "") + "）");
   if (stat.sameContent) log(`同じ中身の写真が別の名前で ${stat.sameContent}枚ありました → 1枚にまとめます`);
   if (stat.notInTable) log(`振り分け表に無い写真: ${stat.notInTable}枚`
-      + (state.keep ? "（いまの写真フォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
-  if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（いまの写真フォルダに残ります）`);
+      + (state.keep ? "（園のパソコンにある写真フォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
+  if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（園のパソコンにある写真フォルダに残ります）`);
   if (stat.missing.length) log(`振り分け表にあるのに、選ばれたフォルダの中に見つからなかった写真: ${stat.missing.length}枚（できあがりの画面に一覧を出します）`);
 
   if (state.mode === "zip" && stat.bytes > 2 * 1024 ** 3) {
@@ -391,18 +419,18 @@ function finish(stat, folderName, zipName){
   if (stat.byLook) rows.push(["　うち、明るさ調整などで変わっていたので見た目で照合", stat.byLook + "枚"]);
   if (stat.sameContent) rows.push(["同じ中身が別名で入っていたので、まとめた分", stat.sameContent + "枚"]);
   if (stat.notInTable) rows.push(["振り分け表に無かった写真", stat.notInTable + "枚"]);
-  if (state.keep && stat.skipped) rows.push(["コピーしなかった写真（いまの写真フォルダに残ります）", stat.skipped + "枚"]);
+  if (state.keep && stat.skipped) rows.push(["コピーしなかった写真（園のパソコンにある写真フォルダに残ります）", stat.skipped + "枚"]);
   if (stat.missing && stat.missing.length) rows.push(["振り分け表にあるのに見つからなかった写真", stat.missing.length + "枚（下に一覧）"]);
   let html = "<table>" + rows.map(r => `<tr><th>${r[0]}</th><td class="n">${r[1]}</td></tr>`).join("") + "</table>";
   html += folderName
     ? `<div class="alert ok">選んでいただいたフォルダの中に <code>${esc(folderName)}</code> ができました。<br>お子様のお名前のフォルダをお開きください。</div>`
     : `<div class="alert ok"><code>${esc(zipName)}</code> をダウンロードしました。<br>ファイルを右クリックして「すべて展開」してください。</div>`;
   html += state.keep
-    ? `<div class="alert warn">「お子様ごとのフォルダだけを作る」を選ばれています。<br>
+    ? `<div class="alert warn">手順2で「いいえ」を選ばれています。<br>
        <strong>どのお子様にも当てはまらなかった写真（${stat.skipped}枚）はコピーしていません。</strong><br>
-       いまの写真フォルダは、これまでどおりそのまま残してください。</div>`
+       園のパソコンにある写真フォルダは、これまでどおりそのまま残してください。</div>`
     : `<div class="alert ok">お預かりした写真は、未分類も含めて<strong>すべて新しいフォルダにコピーしました。</strong><br>
-       中身をご確認いただいたうえで、いまの写真フォルダは整理していただいて差し支えありません。<br>
+       中身をご確認いただいたうえで、園のパソコンにある写真フォルダは整理していただいて差し支えありません。<br>
        <span class="note">整理されたあとは、新しいフォルダがこのパソコンでの唯一の保管先になります。</span></div>`;
 
   if (stat.missing && stat.missing.length) {

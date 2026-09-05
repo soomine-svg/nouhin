@@ -30,6 +30,12 @@ button:disabled{background:#d8cfc8;box-shadow:none;cursor:default;transform:none
 button.ghost{background:#fff;color:var(--orange-d);border:2px solid var(--orange);box-shadow:none}
 button.ghost:hover{background:var(--orange-l);transform:none}
 .choice{display:flex;gap:12px;flex-wrap:wrap}
+button.pick{flex:1 1 260px;text-align:left;background:#fff;color:var(--ink);border:2px solid var(--orange);box-shadow:none;
+            padding:16px 18px;display:flex;flex-direction:column;gap:6px;font-weight:400}
+button.pick:hover{background:var(--orange-l);transform:none}
+.pick-t{font-weight:700;font-size:16px;color:var(--orange-d)}
+.pick-s{font-size:13px;color:var(--sub)}
+.pick-d{font-size:14px;line-height:1.6}
 .chosen{background:var(--orange-l);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:10px}
 .bar{height:14px;background:var(--line);border-radius:99px;overflow:hidden;margin:14px 0 8px}
 .bar>i{display:block;height:100%;width:0;background:var(--orange);transition:width .2s}
@@ -62,18 +68,27 @@ code{background:#f5efe9;padding:2px 7px;border-radius:5px;font-size:13px}
 </section>
 
 <section class="step" id="s2" hidden>
-  <h2><span class="num">2</span>元の写真フォルダは、このあとも残されますか？</h2>
-  <p class="note">残される場合は、お子様ごとのフォルダだけを作ります（容量が少なくて済みます）。<br>
-  削除される予定の場合は、どのお子様にも当てはまらなかった写真も「未分類」に入れます。</p>
+  <h2><span class="num">2</span>できあがるフォルダに、どの写真まで入れますか？</h2>
+  <p class="note">どちらを選んでも、元の写真は変わりません。迷われたときは「すべて」をお選びください。</p>
   <div class="choice">
-    <button class="ghost" data-keep="1">残す</button>
-    <button class="ghost" data-keep="0">削除する予定</button>
+    <button class="pick" data-keep="0">
+      <span class="pick-t">お預かりした写真を、すべて入れる</span>
+      <span class="pick-s">おすすめ。元の写真をあとで片づけたい方、迷われた方</span>
+      <span class="pick-d">お子様ごとのフォルダに加えて、どのお子様にも当てはまらなかった写真も「未分類」フォルダに入れます。写真が抜ける心配がありません。</span>
+    </button>
+    <button class="pick" data-keep="1">
+      <span class="pick-t">お子様ごとのフォルダだけを作る</span>
+      <span class="pick-s">元の写真を、今の場所にそのまま置いておく方</span>
+      <span class="pick-d">どのお子様にも当てはまらなかった写真は作りません（元のフォルダにあるためです）。容量が少なくて済みます。</span>
+    </button>
   </div>
   <div id="keepInfo" class="chosen" hidden></div>
 </section>
 
 <section class="step" id="s3" hidden>
   <h2><span class="num">3</span>写真の入ったフォルダをお選びください</h2>
+  <p class="hint">お預かりした<strong>元の写真をそのまま</strong>お使いください。明るさの調整などをされた写真は、別の名前で保存していただくと確実です。<br>
+  （明るさ・縮小・保存し直し程度なら、見た目で照合し直します。切り抜きや回転をした写真は「未分類」に入ります）</p>
   <p>お送りいただいた写真が入っている親フォルダを、<strong>1つだけ</strong>選んでください。<br>
   中のフォルダはまとめて読み込みます。</p>
   <p class="note" id="destNote"></p>
@@ -130,14 +145,15 @@ $("#tableInput").onchange = async e => {
 };
 
 function buildIndex(t){
-  const byKey = new Map(), byHash = new Map();
+  const byKey = new Map(), byHash = new Map(), withPhash = [];
   for (const p of t["写真"]) {
     const k = p.n + "|" + p.s;
     if (!byKey.has(k)) byKey.set(k, []);
     byKey.get(k).push(p);
     byHash.set(p.h, p);
+    if (p.p && p.p.length === 64) { p.pBits = hexToBits(p.p); withPhash.push(p); }   // 見た目の指紋(2026-09-05)
   }
-  return { byKey, byHash };
+  return { byKey, byHash, withPhash };
 }
 
 /* ---------- 2. 元データを残すか ---------- */
@@ -145,8 +161,8 @@ document.querySelectorAll("[data-keep]").forEach(b => b.onclick = () => {
   state.keep = b.dataset.keep === "1";
   $("#keepInfo").hidden = false;
   $("#keepInfo").innerHTML = state.keep
-    ? "「残す」を選ばれました。<strong>お子様ごとのフォルダだけ</strong>を作ります。"
-    : "「削除する予定」を選ばれました。<strong>未分類の写真も含めて、お預かりした全部</strong>を書き出します。";
+    ? "「お子様ごとのフォルダだけを作る」を選ばれました。当てはまらなかった写真は元のフォルダに残ります。"
+    : "「すべて入れる」を選ばれました。<strong>未分類の写真も含めて、お預かりした全部</strong>を書き出します。";
   $("#s2").classList.add("done"); $("#s3").hidden = false;
   $("#s3").scrollIntoView({behavior:"smooth", block:"center"});
 });
@@ -228,9 +244,9 @@ async function run(entries){
   $("#s3").classList.add("done"); $("#s4").hidden = false;
   $("#s4").scrollIntoView({behavior:"smooth", block:"center"});
 
-  const { byKey, byHash } = state.index;
+  const { byKey, byHash, withPhash } = state.index;
   const plan = [];              // {file, dests:[パス]}
-  const stat = { matched:0, byHash:0, notInTable:0, skipped:0, sameContent:0, bytes:0 };
+  const stat = { matched:0, byHash:0, byLook:0, notInTable:0, skipped:0, sameContent:0, bytes:0 };
   let i = 0;
 
   // --- 照合。同じ中身の写真は1枚にまとめる ---------------------------------
@@ -258,7 +274,32 @@ async function run(entries){
       if (orphans.has(k)) stat.sameContent++; else orphans.set(k, file);
     }
   }
+  // --- 見た目で照合(名前でも中身でも合わなかった写真だけ) --------------------
+  // 園で明るさ調整・縮小・保存し直しされた写真は中身が変わるので上では当たらない。
+  // 振り分け表の「見た目の指紋」(p・256bit)と比べ、まだ誰にも当たっていない行の中で
+  // いちばん近く(48以内)、2位と十分差(12以上)があるものだけ採用する。連写の取り違えを防ぐため。
+  if (orphans.size && withPhash.length) {
+    const free = withPhash.filter(r => !hits.has(r));
+    let k = 0;
+    for (const [key, file] of [...orphans]) {
+      k++;
+      setProg(k, orphans.size, `見た目で照合中… ${k} / ${orphans.size}枚`);
+      const ph = await dhash(file);
+      if (!ph) continue;
+      let best = null, bd = 999, sd = 999;
+      for (const r of free) {
+        const d = hamming(ph, r.pBits);
+        if (d < bd) { sd = bd; bd = d; best = r; } else if (d < sd) sd = d;
+      }
+      if (best && bd <= PH_MAX && (sd - bd) >= PH_MARGIN && !hits.has(best)) {
+        hits.set(best, [file]); orphans.delete(key); stat.byLook++;
+        free.splice(free.indexOf(best), 1);
+      }
+    }
+  }
   stat.matched = hits.size;
+  // --- 表にあるのに園のフォルダで見つからなかった写真（送った後にPCから消えている・別の端末にしかない等）
+  stat.missing = state.table["写真"].filter(r => !hits.has(r));
 
   // --- 書き出す先を決める ---------------------------------------------------
   const add = (file, dests) => { plan.push({ file, dests }); stat.bytes += file.size * dests.length; };
@@ -275,11 +316,13 @@ async function run(entries){
     if (!state.keep) add(file, [join("未分類", "表にない写真", file.name)]);
   }
 
-  log(`照合できた写真: ${stat.matched}枚（うち${stat.byHash}枚は名前が変わっていたので中身で照合）`);
+  log(`照合できた写真: ${stat.matched}枚（うち${stat.byHash}枚は名前が変わっていたので中身で照合`
+      + (stat.byLook ? `、${stat.byLook}枚は明るさ調整などで変わっていたので見た目で照合` : "") + "）");
   if (stat.sameContent) log(`同じ中身の写真が別の名前で ${stat.sameContent}枚ありました → 1枚にまとめます`);
   if (stat.notInTable) log(`振り分け表に無い写真: ${stat.notInTable}枚`
       + (state.keep ? "（元のフォルダに残ります）" : " → 「未分類/表にない写真」に入れます"));
   if (stat.skipped) log(`どのお子様にも当てはまらなかった写真: ${stat.skipped}枚（元のフォルダに残ります）`);
+  if (stat.missing.length) log(`振り分け表にあるのに、選ばれたフォルダの中に見つからなかった写真: ${stat.missing.length}枚（できあがりの画面に一覧を出します）`);
 
   if (state.mode === "zip" && stat.bytes > 2 * 1024 ** 3) {
     setProg(0, 1, "中止しました");
@@ -344,20 +387,33 @@ function finish(stat, folderName, zipName){
   $("#s4").classList.add("done"); $("#s5").hidden = false;
   const rows = [["振り分け表と照合できた写真", stat.matched + "枚"]];
   if (stat.byHash) rows.push(["　うち、名前が変わっていたので中身で照合", stat.byHash + "枚"]);
+  if (stat.byLook) rows.push(["　うち、明るさ調整などで変わっていたので見た目で照合", stat.byLook + "枚"]);
   if (stat.sameContent) rows.push(["同じ中身が別名で入っていたので、まとめた分", stat.sameContent + "枚"]);
   if (stat.notInTable) rows.push(["振り分け表に無かった写真", stat.notInTable + "枚"]);
   if (state.keep && stat.skipped) rows.push(["書き出さなかった写真（元のフォルダに残ります）", stat.skipped + "枚"]);
+  if (stat.missing && stat.missing.length) rows.push(["振り分け表にあるのに見つからなかった写真", stat.missing.length + "枚（下に一覧）"]);
   let html = "<table>" + rows.map(r => `<tr><th>${r[0]}</th><td class="n">${r[1]}</td></tr>`).join("") + "</table>";
   html += folderName
     ? `<div class="alert ok">選んでいただいたフォルダの中に <code>${esc(folderName)}</code> ができました。<br>お子様のお名前のフォルダをお開きください。</div>`
     : `<div class="alert ok"><code>${esc(zipName)}</code> をダウンロードしました。<br>ファイルを右クリックして「すべて展開」してください。</div>`;
   html += state.keep
-    ? `<div class="alert warn">「元の写真フォルダを残す」を選ばれています。<br>
+    ? `<div class="alert warn">「お子様ごとのフォルダだけを作る」を選ばれています。<br>
        <strong>どのお子様にも当てはまらなかった写真（${stat.skipped}枚）は書き出していません。</strong><br>
        元のフォルダは削除しないでください。</div>`
     : `<div class="alert ok">お預かりした写真は、未分類も含めて<strong>すべて書き出しました。</strong><br>
        中身をご確認いただいたうえで、元のフォルダは削除していただいて差し支えありません。<br>
        <span class="note">削除後は、このパソコンが唯一の保管先になります。</span></div>`;
+
+  if (stat.missing && stat.missing.length) {
+    const byEv = new Map();
+    for (const r of stat.missing) { const d = r.d || "（行事なし）"; if (!byEv.has(d)) byEv.set(d, []); byEv.get(d).push(r.n); }
+    let html = `<details class="alert warn" style="margin-top:10px"><summary><strong>振り分け表にあるのに見つからなかった写真 ${stat.missing.length}枚</strong>（クリックで一覧）</summary>
+      <p style="margin:8px 0">お預かりしたときの写真が、選ばれたフォルダの中に無いか、切り抜き・回転などで中身が変わっています。<br>
+      元の写真が別の場所（スマホ・LINE・別のパソコン）にある場合は、そのフォルダも一緒に選んでもう一度お試しください。</p>`;
+    for (const [d, names] of byEv) html += `<p style="margin:6px 0"><strong>${esc(d)}</strong>（${names.length}枚）<br><span style="font-size:12px;color:#555">${names.slice(0, 200).map(esc).join("、")}${names.length > 200 ? "、…" : ""}</span></p>`;
+    html += `</details>`;
+    $("#result").insertAdjacentHTML("beforeend", html);
+  }
   $("#result").innerHTML = html;
   $("#s5").scrollIntoView({behavior:"smooth", block:"start"});
 }
@@ -370,6 +426,34 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">"
 const gb = b => (b / 1024 ** 3).toFixed(1) + "GB";
 function today(){ const d = new Date(), p = n => String(n).padStart(2, "0");
   return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+
+/* 見た目の指紋(dHash 256bit)。photo_fingerprint.py と同じ作り方:
+   EXIFの向きを当てる → 輝度(グレースケール) → 272×256 に縮小 → 16×16 のブロック平均で 17×16 → 各行で 右>左 なら1 → 256bit
+   (272×256 を経由してブロック平均を取るのは、ブラウザと Python で縮小の計算が違っても差がならされるように) */
+const PH_MAX = 48, PH_MARGIN = 12, PH_W = 272, PH_H = 256, PH_B = 16;
+async function dhash(file){
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image", resizeWidth: PH_W, resizeHeight: PH_H, resizeQuality: "high" });
+    const c = document.createElement("canvas"); c.width = PH_W; c.height = PH_H;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(bmp, 0, 0, PH_W, PH_H); bmp.close && bmp.close();
+    const px = ctx.getImageData(0, 0, PH_W, PH_H).data;
+    const small = new Float64Array(17 * 16);
+    for (let y = 0; y < PH_H; y++) for (let x = 0; x < PH_W; x++) {
+      const i = (y * PH_W + x) * 4;
+      small[((y / PH_B) | 0) * 17 + ((x / PH_B) | 0)] += 0.299 * px[i] + 0.587 * px[i+1] + 0.114 * px[i+2];
+    }
+    const bits = new Uint8Array(256);
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) bits[y*16 + x] = small[y*17 + x + 1] > small[y*17 + x] ? 1 : 0;
+    return bits;
+  } catch (e) { return null; }
+}
+function hexToBits(hex){
+  const bits = new Uint8Array(256);
+  for (let i = 0; i < 64 && i < hex.length; i++) { const v = parseInt(hex[i], 16); for (let b = 0; b < 4; b++) bits[i*4 + b] = (v >> (3 - b)) & 1; }
+  return bits;
+}
+function hamming(a, b){ let d = 0; for (let i = 0; i < 256; i++) if (a[i] !== b[i]) d++; return d; }
 
 async function sha1(file){
   const buf = await crypto.subtle.digest("SHA-1", await file.arrayBuffer());

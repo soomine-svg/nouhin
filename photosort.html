@@ -386,6 +386,20 @@ async function run(entries){
   // --- 表にあるのに園のフォルダで見つからなかった写真（送った後にPCから消えている・別の端末にしかない等）
   stat.missing = state.table["写真"].filter(r => !hits.has(r));
 
+  // --- 1枚も照合できなかったとき：結果フォルダを作らず、写真の場所を選び直してもらう（2026-09-10・SSD未接続の実演で発覚）
+  if (!hits.size) {
+    setProg(0, 1, "止まりました");
+    $("#s5").hidden = false;
+    $("#result").innerHTML = `<div class="alert warn"><strong>選ばれたフォルダの中に、振り分け表の写真が1枚も見つかりませんでした。</strong><br>
+      <span class="note">振り分け表の写真 ${state.table["写真"].length}枚 ／ 選ばれたフォルダの中の写真 ${entries.length}枚</span><br><br>
+      フォトポストでお送りいただいた写真が入っているフォルダ（外付けのSSD・別のパソコンなど）をつないで、
+      手順3の「写真フォルダを選ぶ」からもう一度お選びください。<br>
+      新しいフォルダは作っていません。園のパソコンにある写真もそのままです。</div>`;
+    $("#s3").classList.remove("done");
+    $("#s3").scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+
   // --- 書き出す先を決める ---------------------------------------------------
   const add = (file, dests) => { plan.push({ file, dests }); stat.bytes += file.size * dests.length; };
   for (const [rec, files] of hits) {

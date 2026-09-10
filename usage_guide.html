@@ -210,6 +210,44 @@
     .step{page-break-inside:avoid}
     a{color:#000}
   }
+
+  /* ---------- よくあるご質問（build_qa_manga.py --words） ---------- */
+  .qa{margin:0 0 40px}
+  .qa-title{text-align:center;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-size:1.1rem;color:var(--ink);margin:44px 0 8px;font-weight:600}
+  .qa-lead{text-align:center;font-size:.88rem;color:var(--sub);margin:0 0 14px}
+  .qa-lead b{color:var(--accent-deep)}
+  .qa-manga{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 22px}
+  .qa-pill{display:inline-block;background:#fff;border:1px solid var(--accent);color:var(--accent-deep);border-radius:999px;padding:7px 14px;font-size:.84rem;font-weight:700;text-decoration:none}
+  .qa-pill:hover{background:var(--accent);color:#fff}
+  .qa-ch{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 18px;margin-bottom:12px}
+  .qa-ch summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:14px 0;font-weight:700;font-size:1rem;color:var(--ink)}
+  .qa-ch summary::-webkit-details-marker{display:none}
+  .qa-ch summary::after{content:"＋";margin-left:auto;color:var(--accent-deep);font-weight:400}
+  .qa-ch[open] summary::after{content:"－"}
+  .qa-n{width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex:0 0 28px}
+  .qa-cnt{font-size:.78rem;color:var(--sub);font-weight:400}
+  .qa-sub{font-size:.84rem;color:var(--sub);margin:-4px 0 12px 38px}
+  .qa dl{margin:0 0 6px}
+  .qa dt{font-weight:700;font-size:.95rem;color:var(--ink);margin:14px 0 4px;display:flex;gap:8px;align-items:flex-start}
+  .qa dt .q{flex:0 0 auto;background:var(--ink);color:#fff;border-radius:6px;padding:0 7px;font-size:.78rem;line-height:1.7;margin-top:3px}
+  .qa dd{margin:0 0 0 38px;font-size:.9rem;color:var(--ink);line-height:1.8;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+  .qa dd b{color:var(--accent-deep)}
+  .qa-ops{font-size:.82rem;color:var(--sub);margin-top:4px}
+  .qa-ops span{display:inline-block;background:#f4efe6;border-radius:5px;padding:0 6px;margin-right:6px;font-weight:700;color:var(--accent-deep)}
+  .qa-rules{background:#fffdf9;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 6px 38px}
+  .qa-rules .r{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.92rem;font-weight:700}
+  .qa-rules .r:last-of-type{border-bottom:0}
+  .qa-rules .m{font-size:1.3rem;width:26px;text-align:center}
+  .qa-rules .ok .m,.qa-rules .ok .v{color:#2a9d5c}.qa-rules .ng .m,.qa-rules .ng .v{color:#c8404a}
+  .qa-rules .v{margin-left:auto;font-size:.84rem;white-space:nowrap}
+  .qa-note{font-size:.82rem;color:var(--sub);margin:10px 0 0;line-height:1.7}
+  .qa-star{background:#f7f4ee;border-radius:12px;padding:6px 14px 10px;margin:14px 0 0 38px}
+  .qa-star-t{font-size:.82rem;font-weight:700;color:var(--accent-deep);margin:6px 0 0}
+  .qa-star dd{border-bottom:0;margin-left:0}
+  .qa-star dt{margin-top:10px}
+  .qa-sum{font-size:.86rem;color:var(--accent-deep);font-weight:700;margin:12px 0 16px 38px}
+  @media (max-width:560px){.qa-sub,.qa dd,.qa-rules,.qa-star,.qa-sum{margin-left:0}}
+  @media print{.qa-ch{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -372,6 +410,100 @@
     </div>
   </div>
 
+<!-- QA:start（docs/guide/manga/build_qa_manga.py --words で生成。手で直さない） -->
+<section class="qa" id="qa">
+<p class="qa-title">よくあるご質問</p>
+<p class="qa-lead">先生方からよくいただく疑問を、章ごとにまとめました。同じ内容を<b>漫画</b>でも読めます（PDF）。</p>
+<div class="qa-manga">
+<a class="qa-pill" href="manga/photopost_qa_1_okurikata.pdf" target="_blank" rel="noopener">🐼 漫画で見る：写真の送り方</a>
+<a class="qa-pill" href="manga/photopost_qa_2_mihon.pdf" target="_blank" rel="noopener">🐼 漫画で見る：見本写真の送り方</a>
+<a class="qa-pill" href="manga/photopost_qa_3_pdf.pdf" target="_blank" rel="noopener">🐼 漫画で見る：PDFの送り方</a>
+<a class="qa-pill" href="manga/photopost_qa_4_camera.pdf" target="_blank" rel="noopener">🐼 漫画で見る：カメラの日時設定</a>
+<a class="qa-pill" href="manga/photopost_qa_5_sonomama.pdf" target="_blank" rel="noopener">🐼 漫画で見る：送ったあと、写真をさわっていい？</a>
+</div>
+<details class="qa-ch" open><summary><span class="qa-n">1</span>写真の送り方<span class="qa-cnt">12問</span></summary>
+<p class="qa-sub">押すのは3回だけ。迷ったら「いちばん外側のフォルダ」</p>
+<dl>
+<dt><span class="q">Q1</span>写真は、どこから送るの？</dt><dd><b>ご案内メールのURL</b>から送れます。<div class="qa-ops"><span>操作</span>園専用URLを開く → パスワードを入れる → 「開く」</div></dd>
+<dt><span class="q">Q2</span>インストールや登録は要る？</dt><dd>要りません。園のパソコンの<b>ブラウザだけ</b>で送れます。</dd>
+<dt><span class="q">Q3</span>「フォルダを選ぶ」で、どのフォルダを選べばいい？</dt><dd><b>いちばん外側のフォルダ</b>です（例：2025年度）。中は開かない・選ぶだけ。</dd>
+<dt><span class="q">Q4</span>クラスのフォルダを選んだらダメ？</dt><dd>そのクラスしか送れません。<b>外側を選び直して</b>ください。<div class="qa-ops"><span>操作</span>「📁 フォルダを選ぶ」をもう一度</div></dd>
+<dt><span class="q">Q5</span>全部じゃなくて、一部だけ送りたい</dt><dd>一覧で、<b>送りたいフォルダだけにチェック</b>を付けてください。</dd>
+<dt><span class="q">Q6</span>枚数が多くて時間がかかる。途中でやめてもいい？</dt><dd>大丈夫です。もう一度送れば、<b>続きから</b>送れます。</dd>
+<dt><span class="q">Q7</span>送れたかどうかは、どうやって分かる？</dt><dd><b>「ありがとうございました」</b>の画面が出たら完了です。</dd>
+<dt><span class="q">Q8</span>同じ写真を二度送ってしまった</dt><dd><b>増えません</b>。安心して送り直してください。</dd>
+<dt><span class="q">Q9</span>行事のたびに、何回も送っていい？</dt><dd>はい。毎回<b>同じ手順</b>で送ってください。</dd>
+<dt><span class="q">Q10</span>園のスマホで撮って ICT（写真販売）や LINE WORKS に保存した写真を、そこからダウンロードして送ってもいい？</dt><dd><b>元の写真</b>からお願いします。ICT・LINE WORKS からダウンロードした写真は、画質が落ち、撮影日時も消えるので、<b>行事ごとに分けられません</b>。<div class="qa-ops"><span>操作</span>スマホ本体（カメラロール）の写真を → ケーブルでパソコンに取り込む → いつものフォルダへ</div></dd>
+<dt><span class="q">Q11</span>明るさや向きを直したい写真がある。送る前？あと？</dt><dd><b>送る前</b>に済ませてください。明るさ・向きの調整は大丈夫です。画像編集アプリでの加工（フィルター・スタンプ・文字入れ・切り抜き）は要りません。<b>そのままの写真がいちばんきれいに仕上がります</b>。<div class="qa-ops"><span>操作</span>切り抜きはアルバム作りの中でこちらで行います</div></dd>
+<dt><span class="q">Q12</span>分からなくなったら？</dt><dd><b>画面の文をそのまま</b>送ってください。<div class="qa-ops"><span>操作</span>画面の文をコピーして → メールで送る</div></dd>
+</dl>
+<p class="qa-sum">まとめ：① URLを開いてパスワード　② 外側のフォルダを選んでチェック　③ 送るを押す</p>
+</details>
+<details class="qa-ch"><summary><span class="qa-n">2</span>見本写真の送り方<span class="qa-cnt">9問</span></summary>
+<p class="qa-sub">お顔の登録用。1人1枚・正面・名前を付けて</p>
+<dl>
+<dt><span class="q">Q1</span>見本写真って、何？</dt><dd>お子さまのお顔の<b>「名札」</b>になる写真です。アルバムには載せません。</dd>
+<dt><span class="q">Q2</span>何枚いる？</dt><dd><b>1人1枚</b>。0〜2歳のクラスは1人2〜3枚（春と秋など）。</dd>
+<dt><span class="q">Q3</span>どんな写真がいい？</dt><dd><b>正面・お顔が大きい・明るい・1人で写っている</b>・1年以内。</dd>
+<dt><span class="q">Q4</span>ダメな写真は？</dt><dd>横向き・帽子やマスクで目が隠れる・集合写真・暗い・ぶれている、は<b>登録できません</b>。</dd>
+<dt><span class="q">Q5</span>どこに入れる？</dt><dd>いつものフォルダの中に<b>「見本写真」というフォルダ</b>を作って入れてください。<div class="qa-ops"><span>操作</span>右クリック → 新しいフォルダ → 名前を「見本写真」</div></dd>
+<dt><span class="q">Q6</span>ファイルの名前はどうする？</dt><dd>お子さまの<b>お名前</b>にしていただくと、そのまま登録できます。差し支えがあればそのままで（名簿を撮った画像でも大丈夫）。</dd>
+<dt><span class="q">Q7</span>ICT・LINE WORKS に保存した写真でもいい？</dt><dd>見本写真も<b>元の写真</b>からお願いします。スクリーンショットも同じです（理由は「写真の送り方」Q10）。<div class="qa-ops"><span>操作</span>スマホ本体の写真をパソコンに取り込む</div></dd>
+<dt><span class="q">Q8</span>どう送る？</dt><dd>いつもの送り方で、<b>「見本写真」にチェック</b>して送ってください。</dd>
+<dt><span class="q">Q9</span>送ったあと、何かする？</dt><dd>何もありません。<b>登録はこちらで</b>行います。<div class="qa-ops"><span>操作</span>追加・差し替えは同じフォルダに入れて送り直すだけ</div></dd>
+</dl>
+<p class="qa-sum">まとめ：① 「見本写真」のフォルダを作る　② 1人1枚正面のお顔　③ 名前を付けて送る</p>
+</details>
+<details class="qa-ch"><summary><span class="qa-n">3</span>PDFの送り方<span class="qa-cnt">5問</span></summary>
+<p class="qa-sub">行事予定表・文集の原稿など。写真と同じフォルダに入れるだけ</p>
+<dl>
+<dt><span class="q">Q1</span>行事予定表はどう送る？</dt><dd>写真と<b>同じフォルダに入れて、同じ送り方</b>です。<div class="qa-ops"><span>操作</span>PDFを写真のフォルダへ → チェック → 送る</div></dd>
+<dt><span class="q">Q2</span>ボタンの文字が変わったけど？</dt><dd>PDFが混じると<b>「チェックしたデータを送る」</b>に変わるだけ。押す場所は同じです。</dd>
+<dt><span class="q">Q3</span>何枚もあるとき、順番は？</dt><dd>ファイル名の頭に<b>「01_」「02_」</b>を付けると、その順に届きます。</dd>
+<dt><span class="q">Q4</span>紙しかない</dt><dd>スマホで撮った<b>写真で大丈夫</b>です。<div class="qa-ops"><span>操作</span>まっすぐ・明るい場所で</div></dd>
+<dt><span class="q">Q5</span>写真と混ざって困らない？</dt><dd>困りません。PDFは<b>こちらで別に整理</b>します。</dd>
+</dl>
+<p class="qa-sum">まとめ：① PDFを写真のフォルダへ　② チェックして送る　③ 多いときは01_ 02_ の連番</p>
+</details>
+<details class="qa-ch"><summary><span class="qa-n">4</span>カメラの日時設定<span class="qa-cnt">6問</span></summary>
+<p class="qa-sub">写真を行事ごとに分ける鍵です</p>
+<dl>
+<dt><span class="q">Q1</span>カメラの日付、関係ある？</dt><dd>あります。写真を<b>行事ごとに分ける鍵</b>です。</dd>
+<dt><span class="q">Q2</span>合っていないとどうなる？</dt><dd>行事ごとに分けられず、<b>お子さまごとの仕分けだけ</b>になります。</dd>
+<dt><span class="q">Q3</span>いつ確認すればいい？</dt><dd><b>年度のはじめ</b>と、<b>電池を交換したあと</b>。この2回です。<div class="qa-ops"><span>操作</span>電池を交換すると、日付が戻る機種があります</div></dd>
+<dt><span class="q">Q4</span>どうやって確認する？</dt><dd>メニューの<b>「日付／時刻」</b>を今日に合わせて、1枚撮って再生画面で確かめます。<div class="qa-ops"><span>操作</span>⚙️ メニュー → 日付／時刻 → 今日に合わせる → 1枚撮って再生で確認</div></dd>
+<dt><span class="q">Q5</span>スマホやタブレットは？</dt><dd><b>自動で合います</b>。確認は要りません。</dd>
+<dt><span class="q">Q6</span>ずれていた写真を送ってしまった</dt><dd>写真は<b>そのままで大丈夫</b>。こちらで気づいた時点でご連絡します。</dd>
+</dl>
+<p class="qa-sum">まとめ：① 年度はじめに日付を確認　② 電池交換のあとも確認　③ スマホはそのままでOK</p>
+</details>
+<details class="qa-ch"><summary><span class="qa-n">5</span>送ったあと、写真をさわっていい？<span class="qa-cnt">8問</span></summary>
+<p class="qa-sub">名前の変更と明るさ調整は大丈夫。それ以外の編集はしないでください</p>
+<div class="qa-rules">
+<div class="r ok"><span class="m">○</span><span class="t">名前を変える</span><span class="v">OK</span></div>
+<div class="r ok"><span class="m">○</span><span class="t">明るさを直す</span><span class="v">OK（明るさだけ）</span></div>
+<div class="r ng"><span class="m">×</span><span class="t">それ以外の編集（切り抜き・回転・画像編集アプリ）</span><span class="v">NG</span></div>
+<div class="r ng"><span class="m">×</span><span class="t">消す・別の場所へ移す</span><span class="v">NG</span></div>
+<p class="qa-note">仕分けの結果は「どの写真がどのお子さまか」の一覧表で園のパソコンに戻ります。写真が消えたり中身が変わったりすると、一覧表と写真が結びつかず、その写真はお子さまごとのフォルダに入れられません。</p></div>
+<dl>
+<dt><span class="q">Q1</span>送ったあと、写真の名前を変えてもいい？</dt><dd><b>大丈夫です</b>。</dd>
+<dt><span class="q">Q2</span>フォルダの中で整理（移動）してもいい？</dt><dd><b>外側のフォルダの中なら大丈夫</b>。外へ出すのはNGです。</dd>
+<dt><span class="q">Q3</span>明るさを直してもいい？</dt><dd><b>大丈夫です</b>。ただし明るさだけ。</dd>
+<dt><span class="q">Q4</span>切り抜きや回転はいい？</dt><dd><b>NGです</b>。使いたいときは<b>コピーを別の名前で保存</b>してから。<div class="qa-ops"><span>操作</span>右クリック → 複製 → 名前を変えて編集</div></dd>
+<dt><span class="q">Q5</span>送信前なら編集していい？</dt><dd>明るさ・向きの調整は、<b>送る前に</b>済ませてください。画像編集アプリでの加工は、送る前でも要りません（「写真の送り方」Q11）。</dd>
+<dt><span class="q">Q6</span>送ったあとに編集が必要になったら？</dt><dd><b>コピーを別の名前で保存</b>して、コピーの方を編集してください。元の写真はそのままに。</dd>
+<dt><span class="q">Q7</span>写真を消してもいい？</dt><dd><b>消さないでください</b>。消した写真は、お子さまごとのフォルダに入れられません。<div class="qa-ops"><span>操作</span>容量が足りないときは、消す前にご相談ください</div></dd>
+<dt><span class="q">Q8</span>うっかり切り抜き・削除してしまった</dt><dd><b>そのままご連絡</b>ください。直せます。<div class="qa-ops"><span>操作</span>元の写真があれば戻すだけ → 無ければもう一度送るだけ</div></dd>
+</dl>
+<div class="qa-star"><p class="qa-star-t">仕組みを知りたい方へ</p><dl>
+<dt><span class="q">Q</span>仕分けた写真は、園のパソコンにどう戻るの？</dt><dd>写真そのものは送り返しません。「どの写真がどのお子さまか」の一覧表だけをお返しし、園のパソコンの中にある写真と突き合わせて、お子さまごとのフォルダを作ります。写真を送り合わないので、誤送信の心配がなく、受け取りも一瞬です。</dd>
+<dt><span class="q">Q</span>どうして名前を変えても見つかるの？</dt><dd>写真には、名前とは別に、中身から決まる「指紋」のようなものがあります。一覧表はその指紋で写真を探すので、名前が変わっても同じ写真だと分かります。切り抜きや回転をすると指紋が変わり、別の写真になってしまいます。</dd>
+</dl></div>
+<p class="qa-sum">まとめ：① 送った写真はそのまま　② 使うときはコピーを別名で　③ 消した・切り抜いたときはご連絡</p>
+</details>
+</section>
+<!-- QA:end -->
+
   <!-- 連絡先 -->
   <section class="contact">
     <h2>お困りのとき</h2>
@@ -455,5 +587,6 @@
   });
 })();
 </script>
+<script>window.addEventListener('beforeprint',function(){document.querySelectorAll('details.qa-ch').forEach(function(d){d.open=true});});</script>
 </body>
 </html>

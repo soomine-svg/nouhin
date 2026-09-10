@@ -142,6 +142,19 @@
   .m-drop .db{font-size:.92rem;font-weight:700;margin-top:2px}
   .m-drop .ds{font-size:.72rem;color:var(--sub)}
 
+  /* フォルダを選ぶ小窓（手順3の図解） */
+  .picker{padding:0;overflow:hidden}
+  .pk-title{background:#efe9df;font-size:.82rem;font-weight:700;text-align:center;padding:8px;border-bottom:1px solid var(--line)}
+  .pk-row{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:.88rem;border-bottom:1px dashed var(--line)}
+  .pk-row.parent{background:#fff3e0;font-weight:700}
+  .pk-row.child{padding-left:34px;color:var(--sub)}
+  .pk-nm{flex:1}
+  .pk-tag{font-size:.74rem;font-weight:700;white-space:nowrap;border-radius:999px;padding:2px 8px}
+  .pk-tag.ok{background:#e6f4ea;color:#2a9d5c}
+  .pk-tag.ng{background:#fff3f3;color:#c8404a}
+  .pk-btns{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;background:#faf7f2}
+  .pk-btn{font-size:.8rem;font-weight:700;border-radius:8px;padding:6px 14px;background:var(--accent);color:#fff}
+  .pk-btn.ghost{background:#fff;border:1px solid var(--line);color:var(--sub)}
   /* ツリー */
   .m-hint{font-size:.82rem;font-weight:700;margin-bottom:10px;color:var(--ink)}
   .m-row{display:flex;align-items:center;gap:9px;padding:9px 8px;border:1px solid var(--line);border-radius:9px;background:#fffefb;margin-bottom:7px;font-size:.88rem}
@@ -262,14 +275,15 @@
 
   <header>
     <p class="brand">H.P.canvas</p>
-    <p class="brand-sub">フォトポスト（園写真受付システム）</p>
+    <p class="brand-sub">フォトポスト（園写真受付システム）／フォトソート（自動フォルダ分け）</p>
     <h1>写真の送り方ガイド</h1>
     <p class="for-name" id="forName"></p>
   </header>
 
   <p class="lede">
-    園のパソコンから、写真をそのまま送っていただけます。<br>
-    行事予定表などのPDFも、同じように送れます。難しい準備は要りません。
+    園のパソコンから、写真をそのまま送信できます（フォトポスト）。<br>
+    送っていただいた写真は、お子さまごと・行事ごとに自動でフォルダ分けします（フォトソート）。<br>
+    行事予定表などのPDFも、同じ手順で送信できます。難しい準備は不要です。
   </p>
   <div class="chips">
     <span class="chip"><span class="ic">🔌</span>USBの受け渡し不要</span>
@@ -279,8 +293,6 @@
 
   <!-- 専用情報 -->
   <section class="infocard">
-    <h2>この園の専用URLとパスワード</h2>
-    <p class="note">この2つを使って写真を送ります。手順①・②で使います。</p>
 
     <div class="field">
       <span class="label">園専用URL</span>
@@ -313,26 +325,24 @@
       <div class="mock">
         <div class="m-btn m-btn-ghost" style="text-align:left;font-family:ui-monospace,Menlo,monospace;color:var(--sub)">🔗 soomine-svg.github.io/nouhin/…</div>
       </div>
-      <div class="m-cap"><span class="arw">↑</span>このURLをクリック、またはコピーして貼り付け</div>
     </div>
 
     <div class="step">
       <div class="num">2</div>
       <h3>パスワードを入れて「開く」</h3>
-      <p>上の<b>「パスワード」</b>を入力し、<b>開く</b>を押します。これで写真を送る画面になります。</p>
+      <p>上の<b>「パスワード」</b>を入力し、<b>開く</b>を押すと、写真を送る画面になります。</p>
       <div class="mock">
         <div class="m-title">フォトポスト（園写真受付システム）</div>
         <div class="m-sub">○○保育園 さま</div>
         <div class="m-input">••••••</div>
         <div class="m-btn m-btn-primary">開く</div>
       </div>
-      <div class="m-cap"><span class="arw">↑</span>①パスワードを入れて　②「開く」を押す</div>
     </div>
 
     <div class="step">
       <div class="num">3</div>
       <h3>写真の入ったフォルダを選ぶ</h3>
-      <p><b>「📁 フォルダを選ぶ」</b>を押して、写真がまとまっている<b>上のフォルダ</b>を選びます。フォルダは開かず、選ぶだけでOKです。行事予定表などのPDFが同じフォルダに入っていても、そのまま一緒に送れます。</p>
+      <p><b>「📁 フォルダを選ぶ」</b>を押すと、フォルダを選ぶ小窓が開きます。写真をまとめている<b>親フォルダ</b>（例：2025年度）を選んでください。親フォルダは開かず、選ぶだけで大丈夫です。<b>子フォルダ</b>（クラスや行事）を選ぶと、その子フォルダの写真だけを送信します。行事予定表などのPDFが同じフォルダに入っていても、そのまま一緒に送信できます。</p>
       <div class="mock">
         <div class="m-drop">
           <div class="di">📁</div>
@@ -342,12 +352,21 @@
         <div class="m-btn m-btn-primary">📁 フォルダを選ぶ</div>
       </div>
       <div class="m-cap"><span class="arw">↑</span>この大きなボタンを押す（1枚ずつ選ぶこともできます）</div>
+      <div class="mock picker" style="margin-top:14px">
+        <div class="pk-title">フォルダを選ぶ</div>
+        <div class="pk-row parent"><span class="pk-ic">📁</span><span class="pk-nm">2025年度</span><span class="pk-tag ok">○ 親フォルダ ＝ こちらを選ぶ</span></div>
+        <div class="pk-row child"><span class="pk-ic">📁</span><span class="pk-nm">運動会</span><span class="pk-tag ng">× 子フォルダ</span></div>
+        <div class="pk-row child"><span class="pk-ic">📁</span><span class="pk-nm">ひまわり組</span><span class="pk-tag ng">× 子フォルダ</span></div>
+        <div class="pk-row child"><span class="pk-ic">📁</span><span class="pk-nm">業者撮影</span><span class="pk-tag ng">× 子フォルダ</span></div>
+        <div class="pk-btns"><span class="pk-btn ghost">キャンセル</span><span class="pk-btn">アップロード</span></div>
+      </div>
+      <div class="m-cap"><span class="arw">↑</span>小窓では、親フォルダを1回押して（開かずに）「アップロード」</div>
     </div>
 
     <div class="step">
       <div class="num">4</div>
       <h3>送るフォルダにチェックを入れる</h3>
-      <p>中身が一覧で出ます。<b>送りたいフォルダにチェック</b>を入れてください。複数まとめて送れます。</p>
+      <p>フォルダ内の一覧が出ます。<b>送りたいフォルダにチェック</b>を入れてください。複数まとめて送信可能です。</p>
       <div class="mock">
         <div class="m-hint">送るフォルダにチェックを入れてください</div>
         <div class="m-row"><span class="m-tog">▾</span><span class="m-check">✓</span><span class="m-nm">2025年度</span><span class="m-ct">240枚</span></div>
@@ -361,7 +380,7 @@
     <div class="step">
       <div class="num">5</div>
       <h3>「チェックした写真を送る」を押す</h3>
-      <p>後はボタンを押すだけ。枚数が多くても大丈夫です。送り終わると<b>確認画面</b>が出ます。</p>
+      <p>枚数が多くても大丈夫です。送信が完了すると<b>「ありがとうございました」</b>とメッセージが表示されます。</p>
       <div class="mock">
         <div class="m-btn m-btn-send">チェックした写真を送る</div>
         <div style="margin-top:14px">
@@ -381,39 +400,38 @@
   </div>
 
   <!-- 安心の説明 -->
-  <p class="assure-title">知っておいていただきたいこと</p>
+  <p class="assure-title">システムの特徴</p>
   <div class="assure">
     <div class="acard">
       <div class="ai">⏸️</div>
-      <h4>途中でやめても、続きから送れます</h4>
-      <p>もう一度同じ写真を選び直せば、送信済みは自動で飛ばし、まだの分だけを送ります。</p>
+      <h4>送信を途中でやめても大丈夫</h4>
+      <p>もう一度同じ写真を選び直せば、送信済みは自動でスキップし、未送信の分だけを送信します。</p>
     </div>
     <div class="acard">
       <div class="ai">🔁</div>
-      <h4>二度送っても、増えません</h4>
-      <p>写真の中身で見分けるので、重複して保存されません。安心して送り直してください。</p>
+      <h4>同じ写真を送っても大丈夫</h4>
+      <p>既に送信済みの写真は自動でスキップされます。「送ったかな？」と迷われる時は、多めに送信されることをお勧めします。</p>
     </div>
     <div class="acard">
       <div class="ai">🗂️</div>
-      <h4>園ごと・月ごとに自動で仕分け</h4>
-      <p>園名と年月で自動的に整理されます。ファイル名を変える必要はありません。</p>
+      <h4>園ごと・行事ごと・季節ごとなど自動でフォルダ分け</h4>
+      <p>園様の用途に合わせたフォルダ分けをいたします。</p>
     </div>
     <div class="acard">
       <div class="ai">📄</div>
       <h4>行事予定表などのPDFも送れます</h4>
-      <p>写真と一緒に選んでいただければ、そのまま届きます。PDFは写真とは別の場所に整理いたしますので、写真と一緒にお送りいただいて大丈夫です。</p>
-      <p>PDFを何枚もお送りいただくときは、ファイル名を<b>「01_表紙」「02_ちゅうりっぷ組」</b>のような連番にしていただくと、順番どおりに並びます。文集の原稿など、枚数が多いときにお願いいたします。</p>
+      <p>PDFも写真と一緒に送信可能です。複数枚連続するPDFを送信される場合は、ファイル名を<b>「01_表紙」「02_ちゅうりっぷ組」</b>のような付番をお願いします。</p>
     </div>
     <div class="acard">
       <div class="ai">📷</div>
       <h4>カメラの日時設定をご確認ください</h4>
-      <p>デジタルカメラは、充電が切れたまま置いておくと日付と時刻が初期値に戻る機種があります。買ったときのまま合わせていないこともあります。日時が初期値のままのお写真は、<b>行事ごと・季節ごとのフォルダ分けができず、お子様ごとのフォルダ分けのみ</b>となります。</p>
-      <p>年度のはじめと、久しぶりに使われるときにご確認ください。スマートフォン・タブレットは自動で合いますので、確認は不要です。</p>
+      <p>カメラの日時設定がされていない写真には、撮影日時情報が残りません。日時情報がないと、<b>アルバム制作やフォルダ分けに大きな支障</b>をきたします。年度初めや、久しぶりに使われる際には日時設定をご確認ください。</p>
+      <p>スマートフォン・タブレットは自動で合いますので、確認は不要です。</p>
     </div>
     <div class="acard">
       <div class="ai">🔒</div>
       <h4>URLとパスワードの取り扱い</h4>
-      <p>この2つがそろわないと写真は送れません。園の外には出さないようお願いします。</p>
+      <p>URLはブックマークをお勧めします。パスワードは園の外には出さないようにお願いいたします。</p>
     </div>
   </div>
 
@@ -432,7 +450,7 @@
 <details class="qa-ch" open><summary><span class="qa-n">1</span>写真の送り方<span class="qa-cnt">12問</span></summary>
 <p class="qa-sub">押すのは3回だけ。迷ったら「いちばん外側のフォルダ（親フォルダ）」</p>
 <dl>
-<dt><span class="q">Q1</span>写真は、どこから送るの？</dt><dd>ご案内メールに記載した<b>園専用URL</b>から、写真を送っていただけます。<div class="qa-ops"><span>操作</span>園専用URLを開く → パスワードを入れる → 「開く」を押す</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_1_01.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_1_01.jpg" alt="Q1の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
+<dt><span class="q">Q1</span>写真は、どこから送るの？</dt><dd>ご案内メールに記載した<b>園専用URL</b>から送信可能です。<div class="qa-ops"><span>操作</span>園専用URLを開く → パスワードを入れる → 「開く」を押す</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_1_01.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_1_01.jpg" alt="Q1の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q2</span>インストールや登録は必要？</dt><dd>不要です。園のパソコンの<b>ブラウザだけ</b>で送っていただけます。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_1_02.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_1_02.jpg" alt="Q2の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q3</span>「フォルダを選ぶ」で、どのフォルダを選べばいい？</dt><dd><b>いちばん外側のフォルダ（親フォルダ）</b>です（例：2025年度）。親フォルダは開かず、選ぶだけで大丈夫です。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_1_03.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_1_03.jpg" alt="Q3の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q4</span>フォルダが多いとき、どれを選ぶ？</dt><dd>全部をまとめている<b>いちばん外側のフォルダ（親フォルダ）</b>を選んでください。親フォルダ内にある子フォルダを選ぶと、<b>その子フォルダのみを送信します</b>。<div class="qa-ops"><span>操作</span>子フォルダを選んでしまったら → 「📁 フォルダを選ぶ」で親フォルダを選び直す → 再送信</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_1_04.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_1_04.jpg" alt="Q4の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
@@ -455,10 +473,10 @@
 <dt><span class="q">Q3</span>どんな写真がいい？</dt><dd><b>正面を向いていて、お顔が大きく、明るい場所で、1人で写っている</b>写真をお願いします。1年以内に撮ったものが確実です。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_03.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_03.jpg" alt="Q3の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q4</span>ダメな写真は？</dt><dd>横向き・帽子やマスクで目が隠れている・集合写真・暗い・ぶれている写真は、<b>お顔を登録できません</b>。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_04.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_04.jpg" alt="Q4の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q5</span>どこに入れる？</dt><dd>いつもの親フォルダの中に<b>「見本写真」というフォルダ</b>を作って、その中に入れてください。<div class="qa-ops"><span>操作</span>右クリック → 新しいフォルダ → 名前を「見本写真」にする</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_05.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_05.jpg" alt="Q5の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
-<dt><span class="q">Q6</span>ファイルの名前はどうする？</dt><dd>ファイル名をお子さまの<b>お名前</b>にしていただくと、こちらでそのまま登録できます。差し支えがある場合はそのままで結構です（名簿を撮った画像を同じフォルダに入れていただく方法でも大丈夫です）。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_06.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_06.jpg" alt="Q6の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
+<dt><span class="q">Q6</span>ファイルの名前はどうする？</dt><dd>ファイル名をお子さまの<b>お名前</b>にしていただくと、お顔と名前のミスマッチがなくなります。差し支えがある場合はそのままで結構です（名簿を撮った画像を同じフォルダに入れていただく方法でも大丈夫です）。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_06.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_06.jpg" alt="Q6の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q7</span>ICT・LINE WORKS に保存した写真でもいい？</dt><dd>見本写真も、<b>どこも経由させていない元の写真</b>をお願いします。アプリを経由した写真やスクリーンショットは画質が下がり、お顔の登録に支障が出ます（「写真の送り方」Q10もご覧ください）。<div class="qa-ops"><span>操作</span>スマホ本体の写真をパソコンに取り込む</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_07.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_07.jpg" alt="Q7の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q8</span>どう送る？</dt><dd>写真を送るときと同じ手順で、親フォルダを選び、<b>「見本写真」にチェック</b>して送ってください。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_08.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_08.jpg" alt="Q8の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
-<dt><span class="q">Q9</span>送ったあと、何かする？</dt><dd>先生の作業はありません。お顔の登録は、<b>こちらで</b>行います。確認のためにご連絡させていただく場合がございます。<div class="qa-ops"><span>操作</span>追加・差し替えは、同じフォルダに入れて送り直していただくだけです</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_09.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_09.jpg" alt="Q9の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
+<dt><span class="q">Q9</span>送った後は何をすればいい？</dt><dd><b>何もしていただかなくて大丈夫です</b>。確認のためにご連絡させていただく場合がございます。<div class="qa-ops"><span>操作</span>追加・差し替えは、同じフォルダに入れて送り直していただくだけです</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_2_09.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_2_09.jpg" alt="Q9の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① 「見本写真」のフォルダを作る　② 1人1枚正面のお顔　③ 名前を付けて送る</p>
 </details>
@@ -467,8 +485,8 @@
 <dl>
 <dt><span class="q">Q1</span>行事予定表はどう送る？</dt><dd>写真を送るときと同様に、写真と<b>同じ親フォルダに入れて</b>送ってください。<div class="qa-ops"><span>操作</span>PDFを写真の親フォルダへ入れる → チェック → 送る</div><details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_01.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_01.jpg" alt="Q1の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q2</span>ボタンの文字が変わったけど？</dt><dd>PDFが含まれていると、ボタンの表示が<b>「チェックしたデータを送る」</b>になります。そのままそのボタンを押していただければ、写真もPDFも一緒に送信されます。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_02.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_02.jpg" alt="Q2の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
-<dt><span class="q">Q3</span>何枚もあるとき、順番は？</dt><dd>ファイル名の頭に<b>「01_」「02_」</b>と番号を付けていただくと、その順番で届きます。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_03.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_03.jpg" alt="Q3の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
-<dt><span class="q">Q4</span>紙しかない</dt><dd>スマホで撮った<b>写真でも大丈夫</b>です。まっすぐ、明るい場所で撮ってお送りください。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_04.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_04.jpg" alt="Q4の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
+<dt><span class="q">Q3</span>複数枚を一度に送る時の順番は？</dt><dd>ファイル名の頭に<b>「01_」「02_」</b>と番号を付けていただくと、その順番で届きます。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_03.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_03.jpg" alt="Q3の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
+<dt><span class="q">Q4</span>紙の予定表はあるけど、PDFのデータはない。</dt><dd>スマホで撮った<b>写真でも大丈夫</b>です。まっすぐ、明るい場所で撮ってお送りください。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_04.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_04.jpg" alt="Q4の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 <dt><span class="q">Q5</span>写真と混ざって困らない？</dt><dd>写真と混ざっていても困りません。<b>安心してお送りください</b>。<details class="qa-fig"><summary>→ 図解を見る</summary><a href="manga/koma/qa_3_05.jpg" target="_blank" rel="noopener"><img loading="lazy" src="manga/koma/qa_3_05.jpg" alt="Q5の図解（漫画）"></a><span class="qa-fig-hint">画像を押すと大きく開きます</span></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① PDFを写真のフォルダへ　② チェックして送る　③ 多いときは01_ 02_ の連番</p>

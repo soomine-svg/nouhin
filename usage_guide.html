@@ -234,6 +234,11 @@
   .qa dd b{color:var(--accent-deep)}
   .qa-ops{font-size:.82rem;color:var(--sub);margin-top:4px}
   .qa-ops span{display:inline-block;background:#f4efe6;border-radius:5px;padding:0 6px;margin-right:6px;font-weight:700;color:var(--accent-deep)}
+  .qa-fig{margin-top:8px}
+  .qa-fig summary{cursor:pointer;list-style:none;display:inline-block;font-size:.82rem;font-weight:700;color:var(--accent-deep);border:1px solid var(--accent);border-radius:999px;padding:3px 12px;background:#fff}
+  .qa-fig summary::-webkit-details-marker{display:none}
+  .qa-fig[open] summary{background:var(--accent);color:#fff}
+  .qa-fig img{display:block;width:100%;max-width:720px;margin:10px 0 2px;border-radius:10px;box-shadow:0 8px 20px -14px rgba(120,90,40,.6)}
   .qa-rules{background:#fffdf9;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 6px 38px}
   .qa-rules .r{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.92rem;font-weight:700}
   .qa-rules .r:last-of-type{border-bottom:0}
@@ -424,56 +429,56 @@
 <details class="qa-ch" open><summary><span class="qa-n">1</span>写真の送り方<span class="qa-cnt">12問</span></summary>
 <p class="qa-sub">押すのは3回だけ。迷ったら「いちばん外側のフォルダ（親フォルダ）」</p>
 <dl>
-<dt><span class="q">Q1</span>写真は、どこから送るの？</dt><dd><b>ご案内メールのURL</b>から送れます。<div class="qa-ops"><span>操作</span>園専用URLを開く → パスワードを入れる → 「開く」</div></dd>
-<dt><span class="q">Q2</span>インストールや登録は必要？</dt><dd>不要です。園のパソコンの<b>ブラウザだけ</b>で送れます。</dd>
-<dt><span class="q">Q3</span>「フォルダを選ぶ」で、どのフォルダを選べばいい？</dt><dd><b>いちばん外側のフォルダ（親フォルダ）</b>です（例：2025年度）。中は開かない・選ぶだけ。</dd>
-<dt><span class="q">Q4</span>フォルダが多いとき、どれを選ぶ？</dt><dd>分かれ方（行事・クラス・業者撮影など）はそのままで大丈夫です。全部をまとめている<b>いちばん外側のフォルダ（親フォルダ）</b>を選んでください。中のフォルダを選ぶと、<b>その中しか送れません</b>。<div class="qa-ops"><span>操作</span>中を選んでしまったら「📁 フォルダを選ぶ」をもう一度</div></dd>
-<dt><span class="q">Q5</span>全部じゃなくて、一部だけ送りたい</dt><dd>一覧で、<b>送りたいフォルダだけにチェック</b>を付けてください。</dd>
-<dt><span class="q">Q6</span>枚数が多くて時間がかかる。途中でやめてもいい？</dt><dd>大丈夫です。もう一度送れば、<b>続きから</b>送れます。</dd>
-<dt><span class="q">Q7</span>送れたかどうかは、どうやって分かる？</dt><dd><b>「ありがとうございました」</b>の画面が出たら完了です。</dd>
-<dt><span class="q">Q8</span>同じ写真を二度送ってしまった</dt><dd><b>増えません</b>。安心して送り直してください。</dd>
-<dt><span class="q">Q9</span>行事のたびに、何回も送っていい？</dt><dd>はい。毎回<b>同じ手順</b>で送ってください。</dd>
-<dt><span class="q">Q10</span>園のスマホで撮って ICT（写真販売）や LINE WORKS にフォルダ分けして保存している。それをダウンロードして送ってもいい？</dt><dd><b>元の写真</b>からお願いします。ICT・LINE WORKS からダウンロードした写真は、画質が落ち、撮影日時も消えるので、<b>行事ごとに分けられません</b>。<div class="qa-ops"><span>操作</span>スマホ本体（カメラロール）の写真を → ケーブルでパソコンに取り込む → いつものフォルダへ</div></dd>
-<dt><span class="q">Q11</span>明るさや向きを直したい写真がある。送る前？あと？</dt><dd><b>送る前</b>に済ませてください。明るさ・向きの調整は大丈夫です。画像編集アプリでの加工（フィルター・スタンプ・文字入れ・切り抜き）は不要です。<b>そのままの写真がいちばんきれいに仕上がります</b>。<div class="qa-ops"><span>操作</span>切り抜きはアルバム作りの中でこちらで行います</div></dd>
-<dt><span class="q">Q12</span>分からなくなったら？</dt><dd><b>画面の文をそのまま</b>送ってください。<div class="qa-ops"><span>操作</span>画面の文をコピーして → メールで送る</div></dd>
+<dt><span class="q">Q1</span>写真は、どこから送るの？</dt><dd><b>ご案内メールのURL</b>から送れます。<div class="qa-ops"><span>操作</span>園専用URLを開く → パスワードを入れる → 「開く」</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_01.jpg" alt="Q1の図解（漫画）"></details></dd>
+<dt><span class="q">Q2</span>インストールや登録は必要？</dt><dd>不要です。園のパソコンの<b>ブラウザだけ</b>で送れます。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_02.jpg" alt="Q2の図解（漫画）"></details></dd>
+<dt><span class="q">Q3</span>「フォルダを選ぶ」で、どのフォルダを選べばいい？</dt><dd><b>いちばん外側のフォルダ（親フォルダ）</b>です（例：2025年度）。中は開かない・選ぶだけ。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_03.jpg" alt="Q3の図解（漫画）"></details></dd>
+<dt><span class="q">Q4</span>フォルダが多いとき、どれを選ぶ？</dt><dd>分かれ方（行事・クラス・業者撮影など）はそのままで大丈夫です。全部をまとめている<b>いちばん外側のフォルダ（親フォルダ）</b>を選んでください。中のフォルダを選ぶと、<b>その中しか送れません</b>。<div class="qa-ops"><span>操作</span>中を選んでしまったら「📁 フォルダを選ぶ」をもう一度</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_04.jpg" alt="Q4の図解（漫画）"></details></dd>
+<dt><span class="q">Q5</span>全部じゃなくて、一部だけ送りたい</dt><dd>一覧で、<b>送りたいフォルダだけにチェック</b>を付けてください。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_05.jpg" alt="Q5の図解（漫画）"></details></dd>
+<dt><span class="q">Q6</span>枚数が多くて時間がかかる。途中でやめてもいい？</dt><dd>大丈夫です。もう一度送れば、<b>続きから</b>送れます。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_06.jpg" alt="Q6の図解（漫画）"></details></dd>
+<dt><span class="q">Q7</span>送れたかどうかは、どうやって分かる？</dt><dd><b>「ありがとうございました」</b>の画面が出たら完了です。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_07.jpg" alt="Q7の図解（漫画）"></details></dd>
+<dt><span class="q">Q8</span>同じ写真を二度送ってしまった</dt><dd><b>増えません</b>。安心して送り直してください。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_08.jpg" alt="Q8の図解（漫画）"></details></dd>
+<dt><span class="q">Q9</span>行事のたびに、何回も送っていい？</dt><dd>はい。毎回<b>同じ手順</b>で送ってください。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_09.jpg" alt="Q9の図解（漫画）"></details></dd>
+<dt><span class="q">Q10</span>園のスマホで撮って ICT（写真販売）や LINE WORKS にフォルダ分けして保存している。それをダウンロードして送ってもいい？</dt><dd><b>元の写真</b>からお願いします。ICT・LINE WORKS からダウンロードした写真は、画質が落ち、撮影日時も消えるので、<b>行事ごとに分けられません</b>。<div class="qa-ops"><span>操作</span>スマホ本体（カメラロール）の写真を → ケーブルでパソコンに取り込む → いつものフォルダへ</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_10.jpg" alt="Q10の図解（漫画）"></details></dd>
+<dt><span class="q">Q11</span>明るさや向きを直したい写真がある。送る前？あと？</dt><dd><b>送る前</b>に済ませてください。明るさ・向きの調整は大丈夫です。画像編集アプリでの加工（フィルター・スタンプ・文字入れ・切り抜き）は不要です。<b>そのままの写真がいちばんきれいに仕上がります</b>。<div class="qa-ops"><span>操作</span>切り抜きはアルバム作りの中でこちらで行います</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_11.jpg" alt="Q11の図解（漫画）"></details></dd>
+<dt><span class="q">Q12</span>分からなくなったら？</dt><dd><b>画面の文をそのまま</b>送ってください。<div class="qa-ops"><span>操作</span>画面の文をコピーして → メールで送る</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_1_12.jpg" alt="Q12の図解（漫画）"></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① URLを開いてパスワード　② 親フォルダを選んでチェック　③ 送るを押す</p>
 </details>
 <details class="qa-ch"><summary><span class="qa-n">2</span>見本写真の送り方<span class="qa-cnt">9問</span></summary>
 <p class="qa-sub">お顔の登録用。1人1枚・正面・名前を付けて</p>
 <dl>
-<dt><span class="q">Q1</span>見本写真って、何？</dt><dd>お子さまのお顔の<b>「名札」</b>になる写真です。アルバムには載せません。</dd>
-<dt><span class="q">Q2</span>何枚いる？</dt><dd><b>1人1枚</b>。0〜2歳のクラスは1人2〜3枚（春と秋など）。</dd>
-<dt><span class="q">Q3</span>どんな写真がいい？</dt><dd><b>正面・お顔が大きい・明るい・1人で写っている</b>・1年以内。</dd>
-<dt><span class="q">Q4</span>ダメな写真は？</dt><dd>横向き・帽子やマスクで目が隠れる・集合写真・暗い・ぶれている、は<b>登録できません</b>。</dd>
-<dt><span class="q">Q5</span>どこに入れる？</dt><dd>いつものフォルダの中に<b>「見本写真」というフォルダ</b>を作って入れてください。<div class="qa-ops"><span>操作</span>右クリック → 新しいフォルダ → 名前を「見本写真」</div></dd>
-<dt><span class="q">Q6</span>ファイルの名前はどうする？</dt><dd>お子さまの<b>お名前</b>にしていただくと、そのまま登録できます。差し支えがあればそのままで（名簿を撮った画像でも大丈夫）。</dd>
-<dt><span class="q">Q7</span>ICT・LINE WORKS に保存した写真でもいい？</dt><dd>見本写真も<b>元の写真</b>からお願いします。スクリーンショットも同じです（理由は「写真の送り方」Q10）。<div class="qa-ops"><span>操作</span>スマホ本体の写真をパソコンに取り込む</div></dd>
-<dt><span class="q">Q8</span>どう送る？</dt><dd>いつもの送り方で、<b>「見本写真」にチェック</b>して送ってください。</dd>
-<dt><span class="q">Q9</span>送ったあと、何かする？</dt><dd>何もありません。<b>登録はこちらで</b>行います。<div class="qa-ops"><span>操作</span>追加・差し替えは同じフォルダに入れて送り直すだけ</div></dd>
+<dt><span class="q">Q1</span>見本写真って、何？</dt><dd>お子さまのお顔の<b>「名札」</b>になる写真です。アルバムには載せません。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_01.jpg" alt="Q1の図解（漫画）"></details></dd>
+<dt><span class="q">Q2</span>何枚いる？</dt><dd><b>1人1枚</b>。0〜2歳のクラスは1人2〜3枚（春と秋など）。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_02.jpg" alt="Q2の図解（漫画）"></details></dd>
+<dt><span class="q">Q3</span>どんな写真がいい？</dt><dd><b>正面・お顔が大きい・明るい・1人で写っている</b>・1年以内。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_03.jpg" alt="Q3の図解（漫画）"></details></dd>
+<dt><span class="q">Q4</span>ダメな写真は？</dt><dd>横向き・帽子やマスクで目が隠れる・集合写真・暗い・ぶれている、は<b>登録できません</b>。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_04.jpg" alt="Q4の図解（漫画）"></details></dd>
+<dt><span class="q">Q5</span>どこに入れる？</dt><dd>いつものフォルダの中に<b>「見本写真」というフォルダ</b>を作って入れてください。<div class="qa-ops"><span>操作</span>右クリック → 新しいフォルダ → 名前を「見本写真」</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_05.jpg" alt="Q5の図解（漫画）"></details></dd>
+<dt><span class="q">Q6</span>ファイルの名前はどうする？</dt><dd>お子さまの<b>お名前</b>にしていただくと、そのまま登録できます。差し支えがあればそのままで（名簿を撮った画像でも大丈夫）。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_06.jpg" alt="Q6の図解（漫画）"></details></dd>
+<dt><span class="q">Q7</span>ICT・LINE WORKS に保存した写真でもいい？</dt><dd>見本写真も<b>元の写真</b>からお願いします。スクリーンショットも同じです（理由は「写真の送り方」Q10）。<div class="qa-ops"><span>操作</span>スマホ本体の写真をパソコンに取り込む</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_07.jpg" alt="Q7の図解（漫画）"></details></dd>
+<dt><span class="q">Q8</span>どう送る？</dt><dd>いつもの送り方で、<b>「見本写真」にチェック</b>して送ってください。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_08.jpg" alt="Q8の図解（漫画）"></details></dd>
+<dt><span class="q">Q9</span>送ったあと、何かする？</dt><dd>何もありません。<b>登録はこちらで</b>行います。<div class="qa-ops"><span>操作</span>追加・差し替えは同じフォルダに入れて送り直すだけ</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_2_09.jpg" alt="Q9の図解（漫画）"></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① 「見本写真」のフォルダを作る　② 1人1枚正面のお顔　③ 名前を付けて送る</p>
 </details>
 <details class="qa-ch"><summary><span class="qa-n">3</span>PDFの送り方<span class="qa-cnt">5問</span></summary>
 <p class="qa-sub">行事予定表・文集の原稿など。写真と同じフォルダに入れるだけ</p>
 <dl>
-<dt><span class="q">Q1</span>行事予定表はどう送る？</dt><dd>写真と<b>同じフォルダに入れて、同じ送り方</b>です。<div class="qa-ops"><span>操作</span>PDFを写真のフォルダへ → チェック → 送る</div></dd>
-<dt><span class="q">Q2</span>ボタンの文字が変わったけど？</dt><dd>PDFが混じると<b>「チェックしたデータを送る」</b>に変わるだけ。押す場所は同じです。</dd>
-<dt><span class="q">Q3</span>何枚もあるとき、順番は？</dt><dd>ファイル名の頭に<b>「01_」「02_」</b>を付けると、その順に届きます。</dd>
-<dt><span class="q">Q4</span>紙しかない</dt><dd>スマホで撮った<b>写真で大丈夫</b>です。<div class="qa-ops"><span>操作</span>まっすぐ・明るい場所で</div></dd>
-<dt><span class="q">Q5</span>写真と混ざって困らない？</dt><dd>困りません。PDFは<b>こちらで別に整理</b>します。</dd>
+<dt><span class="q">Q1</span>行事予定表はどう送る？</dt><dd>写真と<b>同じフォルダに入れて、同じ送り方</b>です。<div class="qa-ops"><span>操作</span>PDFを写真のフォルダへ → チェック → 送る</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_3_01.jpg" alt="Q1の図解（漫画）"></details></dd>
+<dt><span class="q">Q2</span>ボタンの文字が変わったけど？</dt><dd>PDFが混じると<b>「チェックしたデータを送る」</b>に変わるだけ。押す場所は同じです。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_3_02.jpg" alt="Q2の図解（漫画）"></details></dd>
+<dt><span class="q">Q3</span>何枚もあるとき、順番は？</dt><dd>ファイル名の頭に<b>「01_」「02_」</b>を付けると、その順に届きます。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_3_03.jpg" alt="Q3の図解（漫画）"></details></dd>
+<dt><span class="q">Q4</span>紙しかない</dt><dd>スマホで撮った<b>写真で大丈夫</b>です。<div class="qa-ops"><span>操作</span>まっすぐ・明るい場所で</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_3_04.jpg" alt="Q4の図解（漫画）"></details></dd>
+<dt><span class="q">Q5</span>写真と混ざって困らない？</dt><dd>困りません。PDFは<b>こちらで別に整理</b>します。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_3_05.jpg" alt="Q5の図解（漫画）"></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① PDFを写真のフォルダへ　② チェックして送る　③ 多いときは01_ 02_ の連番</p>
 </details>
 <details class="qa-ch"><summary><span class="qa-n">4</span>カメラの日時設定<span class="qa-cnt">6問</span></summary>
 <p class="qa-sub">写真を行事ごとに分ける鍵です</p>
 <dl>
-<dt><span class="q">Q1</span>カメラの日付、関係ある？</dt><dd>あります。写真を<b>行事ごとに分ける鍵</b>です。</dd>
-<dt><span class="q">Q2</span>合っていないとどうなる？</dt><dd>行事ごとに分けられず、<b>お子さまごとの仕分けだけ</b>になります。</dd>
-<dt><span class="q">Q3</span>いつ確認すればいい？</dt><dd><b>年度のはじめ</b>と、<b>久しぶりに使うとき</b>。この2回です。<div class="qa-ops"><span>操作</span>充電が切れたまま置いておくと、日付が初期値に戻る機種があります</div></dd>
-<dt><span class="q">Q4</span>どうやって確認する？</dt><dd>メニューの<b>「日付／時刻」</b>を今日に合わせて、1枚撮って再生画面で確かめます。<div class="qa-ops"><span>操作</span>⚙️ メニュー → 日付／時刻 → 今日に合わせる → 1枚撮って再生で確認</div></dd>
-<dt><span class="q">Q5</span>スマホやタブレットは？</dt><dd><b>自動で合います</b>。確認は不要です。</dd>
-<dt><span class="q">Q6</span>ずれていた写真を送ってしまった</dt><dd>写真は<b>そのままで大丈夫</b>。こちらで気づいた時点でご連絡します。</dd>
+<dt><span class="q">Q1</span>カメラの日付、関係ある？</dt><dd>あります。写真を<b>行事ごとに分ける鍵</b>です。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_01.jpg" alt="Q1の図解（漫画）"></details></dd>
+<dt><span class="q">Q2</span>合っていないとどうなる？</dt><dd>行事ごとに分けられず、<b>お子さまごとの仕分けだけ</b>になります。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_02.jpg" alt="Q2の図解（漫画）"></details></dd>
+<dt><span class="q">Q3</span>いつ確認すればいい？</dt><dd><b>年度のはじめ</b>と、<b>久しぶりに使うとき</b>。この2回です。<div class="qa-ops"><span>操作</span>充電が切れたまま置いておくと、日付が初期値に戻る機種があります</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_03.jpg" alt="Q3の図解（漫画）"></details></dd>
+<dt><span class="q">Q4</span>どうやって確認する？</dt><dd>メニューの<b>「日付／時刻」</b>を今日に合わせて、1枚撮って再生画面で確かめます。<div class="qa-ops"><span>操作</span>⚙️ メニュー → 日付／時刻 → 今日に合わせる → 1枚撮って再生で確認</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_04.jpg" alt="Q4の図解（漫画）"></details></dd>
+<dt><span class="q">Q5</span>スマホやタブレットは？</dt><dd><b>自動で合います</b>。確認は不要です。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_05.jpg" alt="Q5の図解（漫画）"></details></dd>
+<dt><span class="q">Q6</span>ずれていた写真を送ってしまった</dt><dd>写真は<b>そのままで大丈夫</b>。こちらで気づいた時点でご連絡します。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_4_06.jpg" alt="Q6の図解（漫画）"></details></dd>
 </dl>
 <p class="qa-sum">まとめ：① 年度はじめに日付を確認　② 久しぶりに使うときも確認　③ スマホはそのままでOK</p>
 </details>
@@ -486,14 +491,14 @@
 <div class="r ng"><span class="m">×</span><span class="t">消す・別の場所へ移す</span><span class="v">NG</span></div>
 <p class="qa-note">振り分けの結果は「どの写真がどのお子さまか」の一覧表で園のパソコンに戻ります。写真が消えたり中身が変わったりすると、一覧表と写真が結びつかず、その写真はお子さまごとのフォルダに入れられません。振り分けが終わったあとは、自由に整理していただけます。</p></div>
 <dl>
-<dt><span class="q">Q1</span>送ったあと、写真の名前を変えてもいい？</dt><dd><b>大丈夫です</b>。</dd>
-<dt><span class="q">Q2</span>フォルダの中で整理（移動）してもいい？</dt><dd><b>外側のフォルダ（親フォルダ）の中なら大丈夫</b>。外へ出すのはNGです。</dd>
-<dt><span class="q">Q3</span>明るさを直してもいい？</dt><dd><b>大丈夫です</b>。ただし明るさだけ。</dd>
-<dt><span class="q">Q4</span>切り抜きや回転はいい？</dt><dd><b>NGです</b>。使いたいときは<b>コピーを別の名前で保存</b>してから。<div class="qa-ops"><span>操作</span>右クリック → 複製 → 名前を変えて編集</div></dd>
-<dt><span class="q">Q5</span>送信前なら編集していい？</dt><dd>明るさ・向きの調整なら、<b>送る前に</b>済ませてください。切り抜きやフィルターなど画像編集アプリでの加工は、<b>送る前でもしないでください</b>。そのままの写真がいちばんきれいに仕上がります。</dd>
-<dt><span class="q">Q6</span>送ったあとに編集が必要になったら？</dt><dd><b>コピーを別の名前で保存</b>して、コピーの方を編集してください。元の写真はそのままに。</dd>
-<dt><span class="q">Q7</span>写真を消してもいい？</dt><dd><b>振り分けが終わるまでは消さないでください</b>。消した写真は、お子さまごとのフォルダに入れられません。終わったあとは自由に整理できます。</dd>
-<dt><span class="q">Q8</span>うっかり切り抜き・削除してしまった</dt><dd><b>そのままで大丈夫</b>です。その写真だけ「未分類」フォルダに入り、ほかの写真の振り分けには影響しません。<div class="qa-ops"><span>操作</span>ゴミ箱に残っていれば、元のフォルダへ戻すだけ</div></dd>
+<dt><span class="q">Q1</span>送ったあと、写真の名前を変えてもいい？</dt><dd><b>大丈夫です</b>。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_01.jpg" alt="Q1の図解（漫画）"></details></dd>
+<dt><span class="q">Q2</span>フォルダの中で整理（移動）してもいい？</dt><dd><b>外側のフォルダ（親フォルダ）の中なら大丈夫</b>。外へ出すのはNGです。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_02.jpg" alt="Q2の図解（漫画）"></details></dd>
+<dt><span class="q">Q3</span>明るさを直してもいい？</dt><dd><b>大丈夫です</b>。ただし明るさだけ。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_03.jpg" alt="Q3の図解（漫画）"></details></dd>
+<dt><span class="q">Q4</span>切り抜きや回転はいい？</dt><dd><b>NGです</b>。使いたいときは<b>コピーを別の名前で保存</b>してから。<div class="qa-ops"><span>操作</span>右クリック → 複製 → 名前を変えて編集</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_04.jpg" alt="Q4の図解（漫画）"></details></dd>
+<dt><span class="q">Q5</span>送信前なら編集していい？</dt><dd>明るさ・向きの調整なら、<b>送る前に</b>済ませてください。切り抜きやフィルターなど画像編集アプリでの加工は、<b>送る前でもしないでください</b>。そのままの写真がいちばんきれいに仕上がります。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_05.jpg" alt="Q5の図解（漫画）"></details></dd>
+<dt><span class="q">Q6</span>送ったあとに編集が必要になったら？</dt><dd><b>コピーを別の名前で保存</b>して、コピーの方を編集してください。元の写真はそのままに。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_06.jpg" alt="Q6の図解（漫画）"></details></dd>
+<dt><span class="q">Q7</span>写真を消してもいい？</dt><dd><b>振り分けが終わるまでは消さないでください</b>。消した写真は、お子さまごとのフォルダに入れられません。終わったあとは自由に整理できます。<details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_07.jpg" alt="Q7の図解（漫画）"></details></dd>
+<dt><span class="q">Q8</span>うっかり切り抜き・削除してしまった</dt><dd><b>そのままで大丈夫</b>です。その写真だけ「未分類」フォルダに入り、ほかの写真の振り分けには影響しません。<div class="qa-ops"><span>操作</span>ゴミ箱に残っていれば、元のフォルダへ戻すだけ</div><details class="qa-fig"><summary>→ 図解を見る</summary><img loading="lazy" src="manga/koma/qa_5_08.jpg" alt="Q8の図解（漫画）"></details></dd>
 </dl>
 <div class="qa-star"><p class="qa-star-t">仕組みを知りたい方へ</p><dl>
 <dt><span class="q">Q</span>仕分けた写真は、園のパソコンにどう戻るの？</dt><dd>写真そのものは送り返しません。「どの写真がどのお子さまか」の一覧表だけをお返しし、園のパソコンの中にある写真と突き合わせて、お子さまごとのフォルダを作ります。写真を送り合わないので、誤送信の心配がなく、受け取りも一瞬です。</dd>

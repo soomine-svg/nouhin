@@ -286,6 +286,7 @@
   let PASS = '';
   let SCHOOL_NAME = '';
   let receivedSet = new Set();   // 受取済みキー "位置/名前|サイズ"
+  let receivedTail = new Map();  // 末尾キー "直上のフォルダ名/名前|サイズ" → 受取済みキーの配列（階層が違っても同じ写真を見つける用）
   const PDF_DIR = 'PDF書類';   // PDFだけを入れる、園フォルダ直下の整理棚
   const BIG_FILE_BYTES = 8 * 1024 * 1024;   // これを超えるものは分割して送る
   const CHUNK_BYTES    = 8 * 1024 * 1024;   // 1回に送る大きさ（256KBの倍数であること）
@@ -293,7 +294,7 @@
 
   let files = [];                // 今回選ばれた画像ファイル
   let treeRoot = null;           // フォルダツリー
-  let stripContainer = false;    // 一番上の入れ物フォルダ名を保存先から外すか
+  let stripContainer = false;    // 一番上の入れ物フォルダ名を保存先から外すか（2026-09-14 から常に外さない＝選んだフォルダの名前を保存先に残す）
   let pickMode = '';             // 選び方: 'フォルダ' or '個別'（送信端末の記録に添える）
   let previewUrls = [];          // サムネイルのObjectURL（解放用）
 
@@ -314,7 +315,7 @@
       if(!d.ok){ $('gateErr').textContent = d.error || 'パスワードが違うようです'; return; }
       PASS = pass;
       SCHOOL_NAME = d.schoolName || '';
-      receivedSet = new Set(d.received || []);
+      setReceived(d.received || []);
       $('schoolName').textContent = d.schoolName;
       if(d.lastDate){
         $('statusDate').textContent = d.lastDate + '分';
@@ -392,8 +393,8 @@
       $('send').disabled = true;
       return;
     }
-    // 一番上の入れ物フォルダを保存先から外すか（サブフォルダがある＝構造を保つときだけ外す）
-    stripContainer = files.some(f => folderSegsOf(f).length >= 2);
+    // 選んだフォルダの名前は保存先に残す（どこを選んだかが Drive 側で分かる。学年をまたいで同名フォルダがあっても混ざらない）
+    stripContainer = false;
     treeRoot = buildTree(files);
     renderTree(treeRoot);
     $('treewrap').classList.add('show');
@@ -419,6 +420,27 @@
   }
   function keyOf(drivePath, file){
     return (drivePath ? drivePath + '/' : '') + file.name + '|' + file.size;
+  }
+  // ---------- 受取済みの判定 ----------
+  // 同じ場所にある写真は当然として、園が選ぶフォルダを変えて階層が増減しただけの写真も「受取済み」とみなす。
+  // 判定＝キーの末尾（直上のフォルダ名＋ファイル名＋サイズ）が一致し、かつ一方のパスがもう一方の末尾になっていること。
+  // 例：受取済み「さくら行事写真１/a.jpg|123」に対し、今回「さくら組/さくら行事写真１/a.jpg|123」→ 受取済み。
+  //     フォルダなしの写真は完全一致だけ（名前とサイズだけで同じ写真と決めつけない）。
+  function tailOf(key){ const p = key.split('/'); return p.slice(-2).join('/'); }
+  function addReceived(key){
+    receivedSet.add(key);
+    const t = tailOf(key);
+    if(!receivedTail.has(t)) receivedTail.set(t, []);
+    receivedTail.get(t).push(key);
+  }
+  function setReceived(list){ receivedSet = new Set(); receivedTail = new Map(); list.forEach(addReceived); }
+  function isReceived(drivePath, file){
+    const key = keyOf(drivePath, file);
+    if(receivedSet.has(key)) return true;
+    if(!drivePath) return false;
+    const cands = receivedTail.get(tailOf(key));
+    if(!cands) return false;
+    return cands.some(r => r === key || r.endsWith('/' + key) || key.endsWith('/' + r));
   }
 
   // ---------- ツリー構築 ----------
@@ -546,8 +568,8 @@
     previewUrls.forEach(u=>URL.revokeObjectURL(u)); previewUrls = [];
     const sel = collectSelected();
 
-    const pendingList = sel.filter(s=>!receivedSet.has(keyOf(s.drivePath, s.file)));
-    const doneList    = sel.filter(s=> receivedSet.has(keyOf(s.drivePath, s.file)));
+    const pendingList = sel.filter(s=>!isReceived(s.drivePath, s.file));
+    const doneList    = sel.filter(s=> isReceived(s.drivePath, s.file));
     const pending = pendingList.length;
 
     if(sel.length===0){
@@ -616,7 +638,7 @@
 
   async function upload(){
     const sel = collectSelected();
-    const pending = sel.filter(s=>!receivedSet.has(keyOf(s.drivePath, s.file)));
+    const pending = sel.filter(s=>!isReceived(s.drivePath, s.file));
     if(!pending.length){ $('done').classList.add('show'); return; }
 
     $('send').disabled = true;
@@ -661,7 +683,7 @@
         const s = smalls[idx++];
         const fid = folderMap[s.drivePath];
         const ok = fid ? await uploadOne(s.file, fid, getToken, refresh) : false;
-        if(ok){ receivedSet.add(keyOf(s.drivePath, s.file)); done++; }
+        if(ok){ addReceived(keyOf(s.drivePath, s.file)); done++; }
         else failed.push(s);
         upd();
       }
@@ -678,7 +700,7 @@
       onProgress(0);
       const ok = fid ? await uploadBig(s, fid, getToken, refresh, onProgress) : false;
       bigNote = '';
-      if(ok){ receivedSet.add(keyOf(s.drivePath, s.file)); done++; }
+      if(ok){ addReceived(keyOf(s.drivePath, s.file)); done++; }
       else failed.push(s);
       upd();
     }

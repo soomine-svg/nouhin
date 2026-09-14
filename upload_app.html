@@ -294,6 +294,7 @@
   let files = [];                // 今回選ばれた画像ファイル
   let treeRoot = null;           // フォルダツリー
   let stripContainer = false;    // 一番上の入れ物フォルダ名を保存先から外すか
+  let pickMode = '';             // 選び方: 'フォルダ' or '個別'（送信端末の記録に添える）
   let previewUrls = [];          // サムネイルのObjectURL（解放用）
 
   const $ = id => document.getElementById(id);
@@ -354,8 +355,8 @@
   $('folderBtn').addEventListener('click', ()=>$('folderInput').click());
   $('looseBtn').addEventListener('click', ()=>$('fileInput').click());
   $('drop').addEventListener('click', ()=>$('folderInput').click());
-  $('folderInput').addEventListener('change', e=>handle(e.target.files));
-  $('fileInput').addEventListener('change', e=>handle(e.target.files));
+  $('folderInput').addEventListener('change', e=>{ pickMode='フォルダ'; handle(e.target.files); });
+  $('fileInput').addEventListener('change', e=>{ pickMode='個別'; handle(e.target.files); });
   ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag');}));
   $('drop').addEventListener('drop', e=>{ e.preventDefault(); handle(e.dataTransfer.files); });
@@ -783,7 +784,7 @@
         'X-Upload-Content-Type': file.type || 'application/octet-stream',
         'X-Upload-Content-Length': String(file.size)
       },
-      body: JSON.stringify({ name:name, parents:[folderId] })
+      body: JSON.stringify({ name:name, parents:[folderId], description: uploadNote() })
     });
     if(!res.ok) return null;
     return res.headers.get('Location') || res.headers.get('location');
@@ -849,9 +850,31 @@
     return false;
   }
 
+  // ---------- 送信端末の記録（2026-09-14） ----------
+  // 写真が「園の共有フォルダ」から送られたかは届いた写真からは分からない。
+  // せめて「スマホ・タブレットから直接送られた」ことだけは分かるように、
+  // 端末の区分を Drive ファイルの説明欄に残す（画面には何も出さない。先生の操作は変わらない）。
+  // iPad の Safari は自分を Mac と名乗るので、タッチ操作の有無で見分ける。
+  function deviceClass(){
+    const ua = navigator.userAgent || '';
+    const touch = (navigator.maxTouchPoints || 0) > 1;
+    if(/iPhone|iPod/.test(ua)) return ['スマホ・タブレット','iPhone'];
+    if(/iPad/.test(ua) || (/Macintosh/.test(ua) && touch)) return ['スマホ・タブレット','iPad'];
+    if(/Android/.test(ua)) return ['スマホ・タブレット','Android'];
+    if(/Windows/.test(ua)) return ['パソコン','Windows'];
+    if(/Macintosh/.test(ua)) return ['パソコン','Mac'];
+    if(/CrOS/.test(ua)) return ['パソコン','Chromebook'];
+    if(/Linux/.test(ua)) return ['パソコン','Linux'];
+    return ['不明',''];
+  }
+  function uploadNote(){
+    const [cls, os] = deviceClass();
+    return '送信端末=' + cls + '(' + os + ') 選び方=' + (pickMode || '不明');
+  }
+
   function driveUpload(file, name, folderId, token){
     const boundary = '----hpcanvas' + Math.random().toString(16).slice(2);
-    const meta = { name: name, parents: [folderId] };
+    const meta = { name: name, parents: [folderId], description: uploadNote() };
     const body = new Blob([
       `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
       JSON.stringify(meta),

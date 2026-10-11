@@ -142,6 +142,7 @@
   .bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;}
   .bar i{display:block;height:100%;width:0;background:var(--accent);transition:.3s;}
   .progress p{font-size:.8rem;color:var(--sub);margin-top:6px;text-align:center;}
+  .progress p.wake{font-size:.72rem;margin-top:4px;opacity:.85;}
 
   .help{margin-top:22px;font-size:.82rem;color:var(--sub);line-height:1.85;}
   .help-title{font-weight:700;color:var(--ink);margin:0 0 10px;text-align:center;font-size:.9rem;}
@@ -245,6 +246,7 @@
     <div class="progress" id="progress">
       <div class="bar"><i id="barFill"></i></div>
       <p id="progressTxt">送っています…</p>
+      <p class="wake hidden" id="wakeNote"></p>
     </div>
 
     <button class="send" id="send" disabled>チェックした写真を送る</button>
@@ -636,7 +638,48 @@
   // ---------- 送信 ----------
   $('send').addEventListener('click', upload);
 
+  // ---------- 送信中はパソコンをスリープさせない（Screen Wake Lock） ----------
+  //   送信の始めに取り、終わり（完了・失敗・中断のどれでも）で必ず手放す。
+  //   タブが裏に回ると自動で外れるので、送信中に表へ戻ったら取り直す。
+  //   使えないブラウザでは何もしない（送信は止めない）。代わりに一行だけお願いを出す。
+  let sending = false;
+  let wakeLock = null;
+  const WAKE_ON  = '送信中はパソコンがスリープしないように設定しています（このタブは開いたままにしてください）。';
+  const WAKE_OFF = '送信が終わるまで、パソコンをスリープさせないでください（このタブは開いたままにしてください）。';
+  function showWakeNote(ok){ const n=$('wakeNote'); n.textContent = ok ? WAKE_ON : WAKE_OFF; n.classList.remove('hidden'); }
+  async function acquireWake(){
+    if(!sending) return;
+    try{
+      if(!('wakeLock' in navigator)) throw new Error('unsupported');
+      if(wakeLock && !wakeLock.released){ showWakeNote(true); return; }
+      const lock = await navigator.wakeLock.request('screen');
+      if(!sending){ lock.release().catch(()=>{}); return; }   // 取れた時にはもう送信が終わっていた
+      wakeLock = lock;
+      showWakeNote(true);
+    }catch(e){ wakeLock = null; showWakeNote(false); }
+  }
+  function releaseWake(){
+    const lock = wakeLock; wakeLock = null;
+    if(lock && !lock.released){ try{ lock.release().catch(()=>{}); }catch(e){} }
+    $('wakeNote').classList.add('hidden');
+  }
+  document.addEventListener('visibilitychange', ()=>{
+    if(sending && document.visibilityState === 'visible') acquireWake();
+  });
+
   async function upload(){
+    if(sending) return;
+    sending = true;
+    try{
+      acquireWake();   // 待たない（取れなくても送信は始める）
+      await uploadCore();
+    }finally{
+      sending = false;
+      releaseWake();
+    }
+  }
+
+  async function uploadCore(){
     const sel = collectSelected();
     const pending = sel.filter(s=>!isReceived(s.drivePath, s.file));
     if(!pending.length){ $('done').classList.add('show'); return; }

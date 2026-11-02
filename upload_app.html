@@ -170,6 +170,10 @@
     color:#fff;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
   }
   .gate .err{color:#b5564b;font-size:.8rem;margin-top:10px;min-height:1.2em;}
+  .gateQr{margin-top:18px;padding-top:18px;border-top:1px solid var(--line);}
+  .gateQr b{display:block;font-size:.9rem;margin-bottom:4px;}
+  .gate .gateQr p{margin-bottom:10px;}
+  .gateQr svg{display:block;width:150px;height:150px;margin:0 auto;}
 
   .done{
     position:fixed;inset:0;background:rgba(247,244,238,.96);
@@ -205,6 +209,11 @@
     <input type="text" id="passInput" placeholder="パスワード" autocomplete="off">
     <button id="gateBtn">開く</button>
     <div class="err" id="gateErr"></div>
+    <div class="gateQr hidden" id="gateQr">
+      <b>スマホから送るときは</b>
+      <p>スマホのカメラでこのQRコードを読み取ると、スマホでこの画面が開きます。</p>
+      <div id="gateQrImg"></div>
+    </div>
   </div>
 
   <!-- メイン（認証後に表示） -->
@@ -277,6 +286,7 @@
     </div>
   </div>
 
+<script src="qrcode-generator-1.4.4.js"></script>
 <script>
   // ============================================================
   //  設定：GASのウェブアプリURL
@@ -306,6 +316,16 @@
   const enc = encodeURIComponent;
 
   // ---------- パスワードゲート ----------
+  // パソコンで開いているときは、この園の画面を開くQRコードを出す（パスワードは含めない）
+  (function showGateQr(){
+    if(!SCHOOL_CODE || typeof qrcode !== 'function' || deviceClass()[0] !== 'パソコン') return;
+    const qr = qrcode(0, 'M');
+    qr.addData(location.origin + location.pathname + '?school=' + enc(SCHOOL_CODE));
+    qr.make();
+    $('gateQrImg').innerHTML = qr.createSvgTag({cellSize:4, margin:8, scalable:true});
+    $('gateQr').classList.remove('hidden');
+  })();
+
   $('gateBtn').addEventListener('click', openGate);
   $('passInput').addEventListener('keydown', e => { if(e.key==='Enter') openGate(); });
 

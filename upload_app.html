@@ -227,12 +227,12 @@
     <label class="drop" id="drop">
       <div class="ico">📁</div>
       <div class="big">フォルダを選んでください</div>
-      <div class="small">写真の入っているフォルダを選ぶと、中身を一覧で表示します<br>行事予定表などのPDFも、そのまま一緒に送れます</div>
+      <div class="small">写真の入っているフォルダを選ぶと、中身を一覧で表示します<br>行事予定表などのPDFや、ボイスメモなどの音声も、そのまま一緒に送れます</div>
     </label>
     <input type="file" id="folderInput" webkitdirectory multiple>
-    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif,.pdf,application/pdf">
+    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif,.pdf,application/pdf,audio/*,.m4a,.mp3,.wav,.aac">
     <button type="button" class="folderBtn" id="folderBtn">📁 フォルダを選ぶ</button>
-    <button type="button" class="looseBtn" id="looseBtn">写真・PDFを1つずつ選ぶ場合はこちら</button>
+    <button type="button" class="looseBtn" id="looseBtn">写真・PDF・音声を1つずつ選ぶ場合はこちら</button>
 
     <!-- フォルダのチェックツリー -->
     <div class="treewrap" id="treewrap">
@@ -260,6 +260,7 @@
       </ol>
       <p class="help-note">フォルダは開かずに選ぶだけでOKです。一度送ったものは自動でスキップされます（何度送っても重複しませんのでご安心ください）。</p>
       <p class="help-note">行事予定表や文集の原稿などのPDFも、写真と同じように送れます。PDFはこちらで写真とは別の場所に整理しますので、写真と一緒にお送りいただいて大丈夫です。</p>
+      <p class="help-note">ボイスメモなどの音声も、写真と同じように送れます。音声はこちらで写真とは別の場所に整理します。</p>
       <p class="help-note">PDFを何枚もお送りいただくときは、ファイル名を「01_表紙」「02_ちゅうりっぷ組」のような連番にしていただくと、順番どおりに並びます。</p>
     </div>
   </div>
@@ -290,6 +291,7 @@
   let receivedSet = new Set();   // 受取済みキー "位置/名前|サイズ"
   let receivedTail = new Map();  // 末尾キー "直上のフォルダ名/名前|サイズ" → 受取済みキーの配列（階層が違っても同じ写真を見つける用）
   const PDF_DIR = 'PDF書類';   // PDFだけを入れる、園フォルダ直下の整理棚
+  const AUDIO_DIR = '音声データ';   // 音声だけを入れる、園フォルダ直下の整理棚
   const BIG_FILE_BYTES = 8 * 1024 * 1024;   // これを超えるものは分割して送る
   const CHUNK_BYTES    = 8 * 1024 * 1024;   // 1回に送る大きさ（256KBの倍数であること）
   const RESUME_STORE   = 'hpcanvas.nouhin.resume';   // 送信用URLの控え（続きから送るため）
@@ -342,7 +344,7 @@
       const row = document.createElement('div');
       row.className = 'clsrow';
       const label = String(c.name || '').split('/').join('・');
-      const isDocs = String(c.name || '').indexOf(PDF_DIR) === 0;
+      const isDocs = String(c.name || '').indexOf(PDF_DIR) === 0 || String(c.name || '').indexOf(AUDIO_DIR) === 0;
       const meta = (c.lastDate ? c.lastDate + '送信分まで' : 'まだ') + '・' + (c.count || 0) + (isDocs ? '件' : '枚');
       row.innerHTML = `<span class="clsname">${escapeHtml(label)}</span>`
                     + `<span class="clsmeta">${escapeHtml(meta)}</span>`;
@@ -370,18 +372,26 @@
   function isPdf(f){
     return /pdf/i.test(f.type||'') || /\.pdf$/i.test(f.name);
   }
-  /** 受け付ける対象＝写真 または PDF。これ以外は今までどおり対象外。 */
-  function isAcceptedFile(f){ return isImageFile(f) || isPdf(f); }
+  function isAudio(f){
+    return (f.type||'').startsWith('audio/') || /\.(m4a|mp3|wav|aac)$/i.test(f.name);
+  }
+  /** 受け付ける対象＝写真・PDF・音声。これ以外は今までどおり対象外。 */
+  function isAcceptedFile(f){ return isImageFile(f) || isPdf(f) || isAudio(f); }
 
-  /** 写真とPDFの数を「12枚・PDF 3件」のように書き分ける */
+  /** 写真・PDF・音声の数を「12枚・PDF 3件・音声 2件」のように書き分ける */
+  function kindLabel(img, pdf, audio){
+    const parts = [];
+    if(img > 0 || (pdf === 0 && audio === 0)) parts.push(img + '枚');
+    if(pdf > 0) parts.push('PDF ' + pdf + '件');
+    if(audio > 0) parts.push('音声 ' + audio + '件');
+    return parts.join('・');
+  }
   function countLabel(list){
     const pdf = list.reduce((n,x)=> n + (isPdf(x.file || x) ? 1 : 0), 0);
-    const img = list.length - pdf;
-    if(pdf === 0) return img + '枚';
-    if(img === 0) return 'PDF ' + pdf + '件';
-    return img + '枚・PDF ' + pdf + '件';
+    const audio = list.reduce((n,x)=> n + (isAudio(x.file || x) ? 1 : 0), 0);
+    return kindLabel(list.length - pdf - audio, pdf, audio);
   }
-  function hasPdf(list){ return list.some(x => isPdf(x.file || x)); }
+  function hasNonPhoto(list){ return list.some(x => { const f = x.file || x; return isPdf(f) || isAudio(f); }); }
   function isHeic(f){
     return /heic|heif/i.test(f.type||'') || /\.(heic|heif)$/i.test(f.name);
   }
@@ -389,7 +399,7 @@
   function handle(list){
     files = Array.from(list).filter(isAcceptedFile);
     if(!files.length){
-      $('selcount').textContent = '写真もPDFも見つかりませんでした。';
+      $('selcount').textContent = '写真・PDF・音声が見つかりませんでした。';
       $('treewrap').classList.add('show');
       $('tree').innerHTML = ''; $('preview').innerHTML = '';
       $('send').disabled = true;
@@ -400,7 +410,7 @@
     treeRoot = buildTree(files);
     renderTree(treeRoot);
     $('treewrap').classList.add('show');
-    const sendLabel = hasPdf(files) ? 'チェックしたデータを送る' : 'チェックした写真を送る';
+    const sendLabel = hasNonPhoto(files) ? 'チェックしたデータを送る' : 'チェックした写真を送る';
     $('send').textContent = sendLabel;
     $('helpSendLabel').textContent = sendLabel;   // 説明の3番もボタンと同じ文字にそろえる
     updatePreview();
@@ -417,6 +427,7 @@
     let segs = folderSegsOf(file);
     // PDFは入れ物フォルダを外さない（「PDF書類/文集」のようにまとまって、埋もれない）
     if(isPdf(file)) return [PDF_DIR].concat(segs).join('/');
+    if(isAudio(file)) return [AUDIO_DIR].concat(segs).join('/');
     if(stripContainer) segs = segs.slice(1);
     return segs.join('/');
   }
@@ -466,17 +477,16 @@
     countFiles(root);
     return root;
   }
-  function node(name){ return { name, children:new Map(), files:[], count:0, pdfCount:0, checkState:'none', _cb:null, _childBox:null, _rendered:false }; }
+  function node(name){ return { name, children:new Map(), files:[], count:0, pdfCount:0, audioCount:0, checkState:'none', _cb:null, _childBox:null, _rendered:false }; }
   function countFiles(n){
     let c=n.files.length;
     let p=n.files.reduce((a,f)=>a+(isPdf(f)?1:0),0);
-    n.children.forEach(ch=>{ c+=countFiles(ch); p+=ch.pdfCount; });
-    n.count=c; n.pdfCount=p; return c;
+    let m=n.files.reduce((a,f)=>a+(isAudio(f)?1:0),0);
+    n.children.forEach(ch=>{ c+=countFiles(ch); p+=ch.pdfCount; m+=ch.audioCount; });
+    n.count=c; n.pdfCount=p; n.audioCount=m; return c;
   }
   function nodeLabel(n){
-    if(n.pdfCount === 0) return n.count + '枚';
-    if(n.pdfCount === n.count) return 'PDF ' + n.pdfCount + '件';
-    return (n.count - n.pdfCount) + '枚・PDF ' + n.pdfCount + '件';
+    return kindLabel(n.count - n.pdfCount - n.audioCount, n.pdfCount, n.audioCount);
   }
 
   // ---------- ツリー描画（子は開いた時に描く） ----------
@@ -578,7 +588,7 @@
       $('selcount').textContent = '';
       $('send').disabled = true;
     }else{
-      const head = hasPdf(sel) ? '送るデータ：' : '送る写真：';
+      const head = hasNonPhoto(sel) ? '送るデータ：' : '送る写真：';
       $('selcount').textContent = doneList.length>0
         ? `${head}${countLabel(pendingList)}（ほかに ${countLabel(doneList)} は受取済みで自動スキップ）`
         : `${head}${countLabel(pendingList)}`;
@@ -592,7 +602,7 @@
     const pv = $('preview'); pv.innerHTML = '';
     if(groups.size===0) return;
     const head = document.createElement('h4');
-    head.textContent = hasPdf(sel) ? '送るデータ（確認）' : '送る写真（確認）';
+    head.textContent = hasNonPhoto(sel) ? '送るデータ（確認）' : '送る写真（確認）';
     pv.appendChild(head);
 
     let shown=0;
@@ -621,9 +631,9 @@
 
   function makeThumb(f){
     const t = document.createElement('div'); t.className='thumb';
-    if(isHeic(f) || isPdf(f) || !(f.type||'').startsWith('image/')){
+    if(isHeic(f) || isPdf(f) || isAudio(f) || !(f.type||'').startsWith('image/')){
       // ブラウザで表示できない形式（HEIC・PDF等）はアイコン＋名前で「在る」ことを示す
-      const ic=document.createElement('div'); ic.className='ic'; ic.textContent = isPdf(f) ? '📄' : '🖼️';
+      const ic=document.createElement('div'); ic.className='ic'; ic.textContent = isPdf(f) ? '📄' : isAudio(f) ? '🎙️' : '🖼️';
       const nm=document.createElement('div'); nm.className='nm'; nm.textContent=f.name;
       t.append(ic, nm);
     }else{
@@ -708,7 +718,7 @@
     //   小さいもの … 今までどおり4つずつ並行
     //   大きいもの … 1つずつ、中身を分割して送る（途中で切れてもその続きから／回線を食い合わせない）
     let done=0; const failed=[]; const total=pending.length;
-    const UNIT = hasPdf(pending) ? '件' : '枚';
+    const UNIT = hasNonPhoto(pending) ? '件' : '枚';
     let bigNote = '';
     const upd=()=>{
       barFill.style.width=Math.round(done/total*100)+'%';
